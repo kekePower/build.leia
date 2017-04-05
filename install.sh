@@ -16,6 +16,7 @@ if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 	cp -a include ~/bin/
 	chmod 750 ~/bin/build.leia
 	echo "build.leia is installed."
+	echo "Please edit ~/bin/etc/build.leia.conf before running the script."
 	echo "Please run \"build.leia --help\" to see your options"
 	echo "Good luck!"
 else
