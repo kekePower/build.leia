@@ -18,4 +18,8 @@ if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 	echo "build.leia is installed."
 	echo "Please run \"build.leia --help\" to see your options"
 	echo "Good luck!"
+else
+	echo "I guess this isn't the right time for you."
+	echo "I understand."
+	echo "Please return if/when you're ready."
 fi
