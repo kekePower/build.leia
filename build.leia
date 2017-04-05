@@ -294,4 +294,5 @@ if [[ ${LOCAL_IS_SET} ]]; then
 	fi
 
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}You can view the log output in this file: ${LOGGYLOGFILE}${END}"
 fi
