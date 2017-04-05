@@ -13,7 +13,7 @@ fi
 # This function is used to include common sets of files used
 # Edit the path to reflect your installation
 function include () {
-  INC_FILE=${0:a:h}/include/${1}.inc
+  INC_FILE=${0:a:h}/bin/include/${1}.inc
 	if [[ ! -f ${INC_FILE} ]]; then
 		INC_OPT=$( echo ${1} | cut -d\/ -f2 )
 		echo "Supplied option \"${INC_OPT}\" is not valid."
