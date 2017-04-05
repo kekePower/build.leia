@@ -26,6 +26,7 @@ It will then ask you if you also want to compile the binary-addons later.
 **build.leia --with=** - This is where the magic happens.
 
 Your options are:
+
 **--with=clean** - This will remove the **build-kodi** directory and recreate it.
 
 **--with=dirty** - This will simply pull the updated source and compile as is.
