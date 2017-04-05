@@ -21,6 +21,8 @@ It will then ask you if you also want to compile the binary-addons later.
 
 ### Command line options
 
+**build.leia** - The default is the same as **build.leia --with=clean,addons**
+
 **build.leia --help** will show you a few examples of use
 
 **build.leia --with=** - This is where the magic happens.
@@ -64,4 +66,6 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 * I'd like to see a way for the script to check for known dependencies
 	* If some are missing, download them (git?), compile and install them
 	* The main problem here is that we can't really catch missing dependecies of these unless we go through all of them manually and set up some sort of order
+* Make the installer more robust when it comes to updating.
+	* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.
 * More to come...

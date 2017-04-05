@@ -1,6 +1,7 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="1.1.0"
+TIMEBLOCK="${WHITE}[$(date +%T)]${END}"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -67,11 +68,33 @@ function ShowHelp () {
 	exit
 }
 
-# The default behavior is, for now, to display the help
-# Another option is to just use a set of defaults and run with it
-# I.e. The defaults will be to do a clean install with addons built.
+# The default behavior is to do a clean,addons install
 # Same as build.leia --with=clean,addons
-if [[ ${@} == "" || ${1} == "--help" ]]; then
+if [[ ${@} == "" ]]; then
+	include ${0:t}/install
+	include ${0:t}/clean
+	include ${0:t}/addons
+elif [[ ${@} =~ "--with" ]]; then
+# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
+	if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
+		include ${0:t}/clean
+		MSG="No clean option set. This is the default."
+		echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+		loggy ${MSG}
+	fi
+
+	# Initialze the array in the function WithToArray before use
+	# Options are: --with=clean,dirty,addons,no-git,force
+	WithToArray ${@}
+	for i in ${WithArray}
+	do
+	    include ${0:t}/${i}
+	done
+fi
+
+# If the input is other that --help or --with, display the --help message and exit
+# This should prevent anyone from doing something they didn't want to.
+if [[ ${1} == "--help" || ! ${@} =~ "--with" ]]; then
 	ShowHelp ${0:t}
 	exit
 fi
@@ -79,22 +102,6 @@ fi
 # Function: LOGGER
 # Usage: loggy <message>
 include common/loggy
-
-# Initialze the array in the function WithToArray before use
-# Options are: --with=clean,dirty,addons,no-git,force
-WithToArray ${@}
-for i in ${WithArray}
-do
-    include ${0:t}/${i}
-done
-
-# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
-if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
-	CLEAN_IS_SET=1
-	MSG="No clean option set. This is the default."
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-	loggy ${MSG}
-fi
 
 # We set it to install automatically, no matter if --with=install is set or not
 # This is what we want...
@@ -158,13 +165,13 @@ function git_pull () {
   fi
 	
 	MSG="${L_20} ${VKODI}${YesForce}"
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
 	loggy ${MSG}
     
   if [[ ! ${NOGIT_IS_SET} ]]; then
 
 	MSG="${L_21} ${VKODI} ${L_22}"
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 
 	builtin cd ${KODI}
@@ -178,7 +185,7 @@ function git_pull () {
 			fi
 		
     MSG="${VKODI} ${L_23} ${FORCED}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		echo "${TIMEBLOCK} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
 		GITMSG="${VKODI} is already up to date. New build forced."
         
@@ -207,18 +214,31 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
     
 		if [[ ${CLEAN_IS_SET} ]]; then
 			MSG="Cleaning up old kodi-build"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
-			
+		elif [[ ${DIRTY_IS_SET} ]]; then
+			builtin cd ${KODI}/kodi-build
+		fi
+# End of the GITMSG check
+fi
+
+}
+
+# Function: CONFIGURE_KODI
+function configure_kodi () {
+		if [[ ${CLEAN_IS_SET} ]]; then
 			MSG="${L_31} ${VKODI}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+			echo "${TIMEBLOCK} ${INFO}${MSG}${END}${FFMPEG}"
 			loggy ${MSG}
 			builtin cd ${KODI}/kodi-build
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 		elif [[ ${DIRTY_IS_SET} ]]; then
+			MSG="${L_31} ${VKODI}"
+			echo "${TIMEBLOCK} ${INFO}${MSG}${END}${FFMPEG}"
+			loggy ${MSG}
 			builtin cd ${KODI}/kodi-build
 		fi
 
@@ -226,16 +246,12 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
 			MSG="${L_31} ${VKODI}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+			echo "${TIMEBLOCK} ${INFO}${MSG}${END}${FFMPEG}"
 			loggy ${MSG}
       builtin cd ${KODI}/kodi-build
       cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		fi
-
-# End of the GITMSG check
-fi
-
 }
 
 # Function: BUILD_KODI
@@ -248,13 +264,13 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
     loggy ${MSG}
 		
     MSG="${L_33} ${VKODI}. ${L_34}"
-    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+    echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
     loggy ${MSG}
     cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 
     if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
         MSG="${L_35} ${VKODI} ${L_36}"
-        echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+        echo "${TIMEBLOCK} ${ARROW} ${WARNING}${MSG}${END}"
         loggy ${MSG}
 				FAILED="The nightly build of ${VKODI} failed."
     fi
@@ -269,7 +285,7 @@ function install_kodi () {
 
   if [[ ! ${FAILED} ]]; then
         MSG="${L_90} ${PREFIX}"
-        echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+        echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
         loggy ${MSG}
         builtin cd ${KODI}/kodi-build
         sudo make -s install >> ${LOGGYLOGFILE} 2>&1
@@ -280,25 +296,27 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-if [[ ! ${FAILED} ]]; then
-	if [[ ${CLEAN_IS_SET} ]]; then
-    MSG="${L_91}"
-    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-    loggy ${MSG}
-		builtin cd ${KODI}
-    sudo make -s -C \
-		tools/depends/target/binary-addons \
-		distclean \
-		> /dev/null 2>&1
-	fi
+if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
+	if [[ ! ${FAILED} ]]; then
+		if [[ ${CLEAN_IS_SET} ]]; then
+	    MSG="${L_91}"
+	    echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+	    loggy ${MSG}
+			builtin cd ${KODI}
+	    sudo make -s -C \
+			tools/depends/target/binary-addons \
+			distclean \
+			> /dev/null 2>&1
+		fi
 
-    MSG="${L_92}"
-    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-    loggy ${MSG}
-    sudo make -s -j${NUMCPU} -C \
-    tools/depends/target/binary-addons \
-    PREFIX=${PREFIX} \
-    >> ${LOGGYLOGFILE} 2>&1
+	    MSG="${L_92}"
+	    echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+	    loggy ${MSG}
+	    sudo make -s -j${NUMCPU} -C \
+	    tools/depends/target/binary-addons \
+	    PREFIX=${PREFIX} \
+	    >> ${LOGGYLOGFILE} 2>&1
+	fi
 fi
 }
 
@@ -307,13 +325,14 @@ if [[ ${LOCAL_IS_SET} ]]; then
 	fetch_kodi
 	git_pull
 	clean_kodi
+	configure_kodi
 	build_kodi
 	install_kodi
-	
-	if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
-		install_addons
-	fi
+	install_addons
 
-echo "${WHITE}[$(date +%T)]${END} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
-echo "${WHITE}[$(date +%T)]${END} ${YELLOW}You can view the log output in this file: ${LOGGYLOGFILE}${END}"
+loggy "###################################################################"
+loggy "#             End of compilation for ${VKODI}                     #"
+loggy "###################################################################"
+echo "${TIMEBLOCK} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
+echo "${TIMEBLOCK} ${YELLOW}You can view the log output in this file: ${LOGGYLOGFILE}${END}"
 fi
