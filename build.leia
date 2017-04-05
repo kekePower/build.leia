@@ -74,6 +74,14 @@ function ShowHelp () {
 	exit
 }
 
+# Initialze the array in the function WithToArray before use
+# Options are: --with=clean,dirty,addons,no-git,force
+WithToArray ${@}
+for i in ${WithArray}
+do
+    include ${0:t}/${i}
+done
+
 # The default behavior is to do a clean,addons install
 # Same as build.leia --with=clean,addons
 if [[ ! ${@} ]]; then
@@ -89,13 +97,6 @@ elif [[ ${@} =~ "--with" ]]; then
 		loggy ${MSG}
 	fi
 
-	# Initialze the array in the function WithToArray before use
-	# Options are: --with=clean,dirty,addons,no-git,force
-	WithToArray ${@}
-	for i in ${WithArray}
-	do
-	    include ${0:t}/${i}
-	done
 fi
 
 # If the input is other that --help or --with, display the --help message and exit
