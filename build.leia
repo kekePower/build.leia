@@ -24,10 +24,8 @@ include common/with_to_array
 
 # Function: LOGGER
 # Usage: loggy <message>
-LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)"
-include common/loggy
 
-# We load the configuration from the same place as the script
+# We load the configuration file
 . ${0:a:h}/etc/${0:t}.conf
 
 # Include the language file. Hopefully it'll display all the variables.
@@ -75,8 +73,11 @@ case "$1" in
 	;;
 esac
 
+# This is the local logger function.
+include common/loggy
+
 # Initialze the array in the function WithToArray before use
-# Options are: --with=clean,dirty,install,addons,no-git
+# Options are: --with=clean,dirty,addons,no-git,force
 WithToArray ${@}
 for i in ${WithArray}
 do
@@ -85,6 +86,7 @@ done
 
 # We set it to install automatically, no matter if --with=install is set or not
 # This is what we want...
+# This is only a temporary workaround until I find a smarter way of doing it...
 if [[ ! ${LOCAL_IS_SET} ]]; then
 	include ${0:t}/install
 fi
@@ -95,6 +97,7 @@ KODI=${KODIDIR}/${VKODI}
 YEAR=$(date +%Y)
 ARROW="${W}-${END}${INFO}>${END}"
 
+# This text needs to be added to the language files. Hardcoded for now...
 if [[ ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ]]; then
 	echo "${W}**${END} ${RED}You can't do a clean and dirty compilation at the same time.${END} ${W}**${END}"
 	echo "${W}**${END} ${RED}Please see \"${0:t} --help\" for more information.${END} \t${W}**${END}"
@@ -110,12 +113,12 @@ function fetch_kodi () {
 		
 		if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 			buildin cd ${KODIDIR} > /dev/null 2>&1
-			git clone https://github.com/xbmc/xbmc ${VKODI} > /dev/null 2>&1
+			git clone https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
 			echo "Do you wish to compile and install the binary-addons? (Y/n) \c"
 			read binary-addons
 			
 			if [[ ${binary-addons} == "" || ${binary-addons} == "Y" || ${binary-addons} == "y" ]]; then
-				FRESH_INSTALL=1
+				BINARY_ADDONS_INSTALL=1
 			else
 				echo "OK. I will not install the addons for you."
 			fi
@@ -126,6 +129,8 @@ function fetch_kodi () {
 			exit
 		fi
 	fi
+# We need to set a variable here so that we know it's a fresh copy
+FRESH_INSTALL=1
 }
 
 # Function: GIT_PULL
@@ -141,13 +146,13 @@ function git_pull () {
 	loggy ${MSG}
     
   if [[ ! ${NOGIT_IS_SET} ]]; then
-	
+
 	MSG="${L_21} ${VKODI} ${L_22}"
 	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 
 	builtin cd ${KODI}
-  git pull > /tmp/build.leia.gitpull 2>&1
+  	git pull > /tmp/build.leia.gitpull 2>&1
     
     if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
 			if [[ ${FORCE_IS_SET} ]]; then
@@ -169,6 +174,8 @@ function git_pull () {
   fi
 
 # Removing the temp git pull file
+loggy "##############################################################"
+cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE}
 rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
 
 }
@@ -192,13 +199,18 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
 			builtin cd ${KODI}/kodi-build
-			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} > /dev/null 2>&1
+			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 		elif [[ ${DIRTY_IS_SET} ]]; then
 			builtin cd ${KODI}/kodi-build
 		fi
 
-#    CEC_LIBS=/usr/local ./configure -q --prefix=${PREFIX} $(echo ${CONFARGS}) > /dev/null 2>&1
-		
+		if [[ ${FRESH_INSTALL} ]]; then
+			builtin cd ${KODI}
+			mkdir kodi-build > /dev/null 2>&1
+                        builtin cd ${KODI}/kodi-build
+                        cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
+			loggy "###########################################################"
+		fi
     MSG="${L_33} ${VKODI}. ${L_34}"
     echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
     loggy ${MSG}
@@ -224,7 +236,8 @@ function install_kodi () {
         echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
         loggy ${MSG}
         builtin cd ${KODI}/kodi-build
-        sudo make -s install > /dev/null 2>&1
+        sudo make -s install >> ${LOGGYLOGFILE} 2>&1
+	loggy "#########################################################"
   fi
 
 }
@@ -249,13 +262,10 @@ if [[ ! ${FAILED} ]]; then
     sudo make -s -j${NUMCPU} -C \
     tools/depends/target/binary-addons \
     PREFIX=${PREFIX} \
-    > /dev/null 2>&1
-    # sudo rm -rf ${PREFIX}/lib/kodi/addons/pvr*
+    >> ${LOGGYLOGFILE} 2>&1
 fi
 }
 
-
-# addons, clean, dirty, install
 
 if [[ ${LOCAL_IS_SET} ]]; then
 	fetch_kodi
@@ -263,7 +273,7 @@ if [[ ${LOCAL_IS_SET} ]]; then
 	build_kodi
 	install_kodi
 	
-	if [[ ${ADDON_IS_SET} || ${FRESH_INSTALL} ]]; then
+	if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
 		install_addons
 	fi
 
