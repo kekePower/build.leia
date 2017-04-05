@@ -17,7 +17,6 @@ function include () {
 		INC_OPT=$( echo ${1} | cut -d\/ -f2 )
 		echo "Supplied option \"${INC_OPT}\" is not valid."
 		echo "Not critical. Will continue."
-		exit
 	else
 		. ${INC_FILE}
 	fi
