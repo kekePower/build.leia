@@ -32,6 +32,10 @@ include common/with_to_array
 # We load the configuration file
 . ${0:a:h}/etc/${0:t}.conf
 
+# Function: LOGGER
+# Usage: loggy <message>
+include common/loggy
+
 # We try to find the system language and include it in the script.
 # If we don't have the translation for the supplied language, the
 # script will ask if the user wants to use en_US for now.
@@ -100,10 +104,6 @@ if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
 	exit
 fi
-
-# Function: LOGGER
-# Usage: loggy <message>
-include common/loggy
 
 # We set it to install automatically, no matter if --with=install is set or not
 # This is what we want...
