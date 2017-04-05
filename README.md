@@ -1,6 +1,6 @@
 # build.leia
 
-This is a complete hack to fetch(clone), update, compile and install [Kodi](/xbmc/xbmc) from source.
+This is a complete hack to fetch(clone), update, compile and install [Kodi](https://github.com/xbmc/xbmc) from source.
 
 It uses the Z Shell (ZSH) as I find it more than capable for my needs.
 
