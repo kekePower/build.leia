@@ -4,7 +4,7 @@
 
 function WithToArray () {
 
-	if [[ ${@} =~ "--with" ]] || [[ ${@} =~ "--install" ]];then
+	if [[ ${@} =~ "--with" ]];then
 	        WithArray=( $( echo ${@} | cut -d= -f2 | sed 's/\,/\ /g' ) )
 	fi
 

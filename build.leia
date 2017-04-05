@@ -1,9 +1,6 @@
-#!/usr/local/bin/zsh
+#!/bin/zsh
 
 SCRIPT_VERSION="1.0.0"
-
-# Kodi 16.0 Final in git
-# a5f3a997be62e7f2c0f1c1cf6878f096629a5db2
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -15,15 +12,20 @@ fi
 # This function is used to include common sets of files used
 # Edit the path to reflect your installation
 function include () {
-    . ${HOME}/bin/include/${1}.inc
+  INC_FILE=${0:a:h}/include/${1}.inc
+	if [[ ! -f ${INC_FILE} ]]; then
+		INC_OPT=$( echo ${1} | cut -d\/ -f2 )
+		echo "Supplied option \"${INC_OPT}\" is not valid."
+		echo "Not critical. Will continue."
+		exit
+	else
+		. ${INC_FILE}
+	fi
 }
 
 include common/colors
 include common/numcpu
 include common/with_to_array
-
-# Function: LOGGER
-# Usage: loggy <message>
 
 # We load the configuration file
 . ${0:a:h}/etc/${0:t}.conf
@@ -67,13 +69,14 @@ if [[ ${@} == "" ]]; then
 	exit
 fi
 
-case "$1" in
+case "${1}" in
 	--help)
     ShowHelp ${0:t}
 	;;
 esac
 
-# This is the local logger function.
+# Function: LOGGER
+# Usage: loggy <message>
 include common/loggy
 
 # Initialze the array in the function WithToArray before use
@@ -84,6 +87,14 @@ do
     include ${0:t}/${i}
 done
 
+# We default to doing a clean install if not --with=clean is set
+if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
+	CLEAN_IS_SET=1
+	MSG="No clean option set. This is the default."
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
+fi
+
 # We set it to install automatically, no matter if --with=install is set or not
 # This is what we want...
 # This is only a temporary workaround until I find a smarter way of doing it...
@@ -92,7 +103,11 @@ if [[ ! ${LOCAL_IS_SET} ]]; then
 fi
 
 VKODI=Leia
+
+# Edit this to install to another directory
 PREFIX="/opt/${VKODI}"
+#
+
 KODI=${KODIDIR}/${VKODI}
 YEAR=$(date +%Y)
 ARROW="${W}-${END}${INFO}>${END}"
@@ -175,7 +190,7 @@ function git_pull () {
 
 # Removing the temp git pull file
 loggy "##############################################################"
-cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE}
+cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
 rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
 
 }
