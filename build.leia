@@ -76,13 +76,13 @@ function ShowHelp () {
 
 # The default behavior is to do a clean,addons install
 # Same as build.leia --with=clean,addons
-if [[ ${@} == "" ]]; then
+if [[ ! ${@} ]]; then
 	include ${0:t}/install
 	include ${0:t}/clean
 	include ${0:t}/addons
 elif [[ ${@} =~ "--with" ]]; then
 # We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
-	if [[ ! ${CLEAN_IS_SET} || ! ${DIRTY_IS_SET} ]]; then
+	if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
 		include ${0:t}/clean
 		MSG="No clean option set. This is the default."
 		echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
