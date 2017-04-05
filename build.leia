@@ -29,7 +29,11 @@ include common/with_to_array
 # We load the configuration file
 . ${0:a:h}/etc/${0:t}.conf
 
-# Include the language file. Hopefully it'll display all the variables.
+# We try to find the system language and include it in the script.
+# If we don't have the translation for the supplied language, the
+# script will ask if the user wants to use en_US for now.
+# It is also suggested that the user may want to help out by
+# translating this script to their language.
 SysLang=$( echo ${LANG} | cut -d= -f2 | cut -d. -f1 | sort -u )
 
 if [[ -f ${INCLUDEDIR}/${0:t}/language/${MyLANG}.inc ]]; then
@@ -63,16 +67,14 @@ function ShowHelp () {
 	exit
 }
 
-if [[ ${@} == "" ]]; then
+# The default behavior is, for now, to display the help
+# Another option is to just use a set of defaults and run with it
+# I.e. The defaults will be to do a clean install with addons built.
+# Same as build.leia --with=clean,addons
+if [[ ${@} == "" || ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
 	exit
 fi
-
-case "${1}" in
-	--help)
-    ShowHelp ${0:t}
-	;;
-esac
 
 # Function: LOGGER
 # Usage: loggy <message>
@@ -86,7 +88,7 @@ do
     include ${0:t}/${i}
 done
 
-# We default to doing a clean install if not --with=clean is set
+# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
 if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
 	CLEAN_IS_SET=1
 	MSG="No clean option set. This is the default."
@@ -228,7 +230,7 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
     MSG="${L_33} ${VKODI}. ${L_34}"
     echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
     loggy ${MSG}
-    cmake --build . -- VERBOSE=0 -s -j${NUMCPU} > /dev/null 2>&1
+    cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 
     if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
         MSG="${L_35} ${VKODI} ${L_36}"
@@ -291,5 +293,5 @@ if [[ ${LOCAL_IS_SET} ]]; then
 		install_addons
 	fi
 
-echo "${WHITE}[$(date +%T)]${END} ${INFO}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
 fi

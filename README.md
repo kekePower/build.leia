@@ -33,7 +33,9 @@ Your options are:
 
 **--with=addons** - This will clean and compile the binary-addons.
 
-**--with=force** - This will compile Kodi even if there are no new updates.
+**--with=no-git** - This will skip pulling for updates from Github and just carry on with the compilation. This can be used if one compilation has failed after an update and you want to run it again.
+
+**--with=force** - This will compile Kodi even if there are no new updates from Github.
 
 You can use any of these options together, except from **clean** and **dirty**.
 
