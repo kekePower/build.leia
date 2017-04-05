@@ -1,0 +1,264 @@
+#!/usr/local/bin/zsh
+
+SCRIPT_VERSION="1.0.0"
+
+# Kodi 16.0 Final in git
+# a5f3a997be62e7f2c0f1c1cf6878f096629a5db2
+
+if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
+    echo "Please edit the configuration file located at"
+    echo "${0:a:h}/etc/${0:t}.conf"
+    echo "Script aborted."
+    exit
+fi
+    
+# This function is used to include common sets of files used
+# Edit the path to reflect your installation
+function include () {
+    . ${HOME}/bin/include/${1}.inc
+}
+
+include common/colors
+include common/numcpu
+include common/with_to_array
+
+# Function: LOGGER
+# Usage: loggy <message>
+LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)"
+include common/loggy
+
+# We load the configuration from the same place as the script
+. ${0:a:h}/etc/${0:t}.conf
+
+# Include the language file. Hopefully it'll display all the variables.
+SysLang=$( echo ${LANG} | cut -d= -f2 | cut -d. -f1 | sort -u )
+
+if [[ -f ${INCLUDEDIR}/${0:t}/language/${MyLANG}.inc ]]; then
+    include ${0:t}/language/${MyLANG} ${0:t}
+    NOLANG=${SysLang}
+elif [[ -f ${INCLUDEDIR}/${0:t}/language/${SysLang}.inc ]]; then
+    include ${0:t}/language/${SysLang} ${0:t}
+    NOLANG=${MyLANG}
+else
+    echo "\n${RED}Could not find a language file for your system language (${NOLANG}).${END}"
+    echo "${WHITE}Would you like to continue with English (en_US)? (Y/n)${END} \c"
+    read LangAnswer
+    if [[ ( ${LangAnswer} == "" || ${LangAnswer} == "Y" || ${LangAnswer} == "y" ) ]]; then
+        include ${0:t}/language/en_US ${0:t}
+    else
+        echo "\n${YELLOW}You decided not to continue. Sorry about that!${END}"
+        echo "${WHITE}Please consider translating this script to your language.${END}"
+        echo "${WHITE}The language files can be found at"
+        echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
+        exit
+    fi
+fi
+
+function ShowHelp () {
+	# Usage: ShowHelp ${0:t}
+    for i in {10..22}
+    do
+        help=Help_${i}
+        eval echo \$${help}
+    done
+	exit
+}
+
+if [[ ${@} == "" ]]; then
+	ShowHelp ${0:t}
+	exit
+fi
+
+case "$1" in
+	--help)
+    ShowHelp ${0:t}
+	;;
+esac
+
+# Initialze the array in the function WithToArray before use
+# Options are: --with=clean,dirty,install,addons,no-git
+WithToArray ${@}
+for i in ${WithArray}
+do
+    include ${0:t}/${i}
+done
+
+# We set it to install automatically, no matter if --with=install is set or not
+# This is what we want...
+if [[ ! ${LOCAL_IS_SET} ]]; then
+	include ${0:t}/install
+fi
+
+VKODI=Leia
+PREFIX="/opt/${VKODI}"
+KODI=${KODIDIR}/${VKODI}
+YEAR=$(date +%Y)
+ARROW="${W}-${END}${INFO}>${END}"
+
+# Function: FETCH_KODI
+function fetch_kodi () {
+	if [[ ! -d ${KODI} ]]; then
+		echo "Kodi source not found. Would you like me to fetch it? (Y/n) \c"
+		read answer
+		
+		if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
+			buildin cd ${KODIDIR} > /dev/null 2>&1
+			git clone https://github.com/xbmc/xbmc ${VKODI} > /dev/null 2>&1
+			echo "Do you wish to compile and install the binary-addons? (Y/n) \c"
+			read binary-addons
+			
+			if [[ ${binary-addons} == "" || ${binary-addons} == "Y" || ${binary-addons} == "y" ]]; then
+				FRESH_INSTALL=1
+			else
+				echo "OK. I will not install the addons for you."
+			fi
+		else
+			echo "\n ${ARROW} Please clone the Kodi source into ${KODI}"
+			echo "${ARROW} git clone https://github.com/xbmc/xbmc ${VKODI}"
+			echo "${ARROW} Aborting!"
+			exit
+		fi
+	fi
+}
+
+# Function: GIT_PULL
+function git_pull () {
+
+  if [[ ${FORCE_IS_SET} ]]; then
+      local YesForce
+      YesForce=" (${L_24})"
+  fi
+	
+	MSG="${L_20} ${VKODI}${YesForce}"
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
+    
+  if [[ ! ${NOGIT_IS_SET} ]]; then
+	
+	MSG="${L_21} ${VKODI} ${L_22}"
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
+
+	builtin cd ${KODI}
+  git pull > /tmp/build.leia.gitpull 2>&1
+    
+    if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
+			if [[ ${FORCE_IS_SET} ]]; then
+				FORCED="${L_24}"
+			else
+				FORCED="${L_25}"
+			fi
+		
+    MSG="${VKODI} ${L_23} ${FORCED}"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
+		GITMSG="${VKODI} is already up to date. New build forced."
+        
+		if [[ ! ${FORCE_IS_SET} ]]; then
+      GITMSG="${VKODI} is already up to date. No new build at the moment."
+			exit
+		fi
+	fi
+  fi
+
+# Removing the temp git pull file
+rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
+
+}
+
+# Function: BUILD_KODI
+function build_kodi () {
+
+# We check if we have a message from git_pull. If not, we continue the build
+if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
+
+    MSG="${L_30} ${KODINAMEVERSION}"
+    loggy ${MSG}
+
+    MSG="${L_31} ${VKODI}"
+    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+    loggy ${MSG}
+    
+		if [[ ${CLEAN_IS_SET} ]]; then
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}Cleaning up old kodi-build${END}"
+			builtin cd ${KODI}
+			rm -rf kodi-build > /dev/null 2>&1
+			mkdir kodi-build > /dev/null 2>&1
+			builtin cd ${KODI}/kodi-build
+			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} > /dev/null 2>&1
+		elif [[ ${DIRTY_IS_SET} ]]; then
+			builtin cd ${KODI}/kodi-build
+		fi
+
+#    CEC_LIBS=/usr/local ./configure -q --prefix=${PREFIX} $(echo ${CONFARGS}) > /dev/null 2>&1
+		
+    MSG="${L_33} ${VKODI}. ${L_34}"
+    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+    loggy ${MSG}
+    cmake --build . -- VERBOSE=0 -s -j${NUMCPU} > /dev/null 2>&1
+
+    if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
+        MSG="${L_35} ${VKODI} ${L_36}"
+        echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+        loggy ${MSG}
+				FAILED="The nightly build of ${VKODI} failed."
+    fi
+
+# End of the GITMSG check
+fi
+
+}
+
+# Function: INSTALL_KODI
+function install_kodi () {
+
+  if [[ ! ${FAILED} ]]; then
+        MSG="${L_90} ${PREFIX}"
+        echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+        loggy ${MSG}
+        builtin cd ${KODI}/kodi-build
+        sudo make -s install > /dev/null 2>&1
+  fi
+
+}
+
+# Function: INSTALL_ADDONS
+function install_addons () {
+if [[ ! ${FAILED} ]]; then
+	if [[ ${CLEAN_IS_SET} ]]; then
+    MSG="${L_91}"
+    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+    loggy ${MSG}
+		builtin cd ${KODI}
+    sudo make -s -C \
+		tools/depends/target/binary-addons \
+		distclean \
+		> /dev/null 2>&1
+	fi
+
+    MSG="${L_92}"
+    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+    loggy ${MSG}
+    sudo make -s -j${NUMCPU} -C \
+    tools/depends/target/binary-addons \
+    PREFIX=${PREFIX} \
+    > /dev/null 2>&1
+    # sudo rm -rf ${PREFIX}/lib/kodi/addons/pvr*
+fi
+}
+
+
+# addons, clean, dirty, install
+
+if [[ ${LOCAL_IS_SET} ]]; then
+	fetch_kodi
+	git_pull
+	build_kodi
+	install_kodi
+	
+	if [[ ${ADDON_IS_SET} || ${FRESH_INSTALL} ]]; then
+		install_addons
+	fi
+
+echo "echo "${WHITE}[$(date +%T)]${END} ${INFO}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
+fi
