@@ -1,4 +1,4 @@
-#!/usr/local/bin/zsh
+#!/bin/zsh
 
 SCRIPT_VERSION="1.0.0"
 
@@ -90,7 +90,11 @@ if [[ ! ${LOCAL_IS_SET} ]]; then
 fi
 
 VKODI=Leia
+
+# Edit this to change the install directory for Kodi
 PREFIX="/opt/${VKODI}"
+#
+#
 KODI=${KODIDIR}/${VKODI}
 YEAR=$(date +%Y)
 ARROW="${W}-${END}${INFO}>${END}"
