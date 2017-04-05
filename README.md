@@ -38,3 +38,11 @@ Your options are:
 You can use any of these options together, except from **clean** and **dirty**.
 
 **build.leia --with=clean,addons,force** will remove the **kodi-build** directory, recreate it, check to see if there are updates from Github and even if there are no new updates, it will continue with the compilation and lastly it will do a **distclean** for the binary-addons and re-compile them.
+
+## Troubleshooting
+
+If you're experiencing problems, it really doesn't have anything to do with the script.
+
+Please cd into your Leia source code: **cd ${HOME}/kodi/Leia/kodi-build** and run the following command: **cmake .. -DCMAKE_INSTALL_PREFIX=/opt/Leia**
+
+You will see the complete output of the command and possibly find you're missing some libraries and/or tools necessary to compile Kodi. Install the missing libraries and/or tools and try again. Once you've sorted all this out, you're ready to run the script.
