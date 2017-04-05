@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/local/bin/zsh
 
 SCRIPT_VERSION="1.0.0"
 
@@ -90,14 +90,17 @@ if [[ ! ${LOCAL_IS_SET} ]]; then
 fi
 
 VKODI=Leia
-
-# Edit this to change the install directory for Kodi
 PREFIX="/opt/${VKODI}"
-#
-#
 KODI=${KODIDIR}/${VKODI}
 YEAR=$(date +%Y)
 ARROW="${W}-${END}${INFO}>${END}"
+
+if [[ ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ]]; then
+	echo "${W}**${END} ${RED}You can't do a clean and dirty compilation at the same time.${END} ${W}**${END}"
+	echo "${W}**${END} ${RED}Please see \"${0:t} --help\" for more information.${END} \t${W}**${END}"
+	echo "${W}**${END} ${RED}Aborting!${END} \t\t\t\t\t\t\t${W}**${END}"
+	exit
+fi
 
 # Function: FETCH_KODI
 function fetch_kodi () {
