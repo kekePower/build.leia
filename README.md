@@ -46,3 +46,11 @@ If you're experiencing problems, it really doesn't have anything to do with the 
 Please cd into your Leia source code: **cd ${HOME}/kodi/Leia/kodi-build** and run the following command: **cmake .. -DCMAKE_INSTALL_PREFIX=/opt/Leia**
 
 You will see the complete output of the command and possibly find you're missing some libraries and/or tools necessary to compile Kodi. Install the missing libraries and/or tools and try again. Once you've sorted all this out, you're ready to run the script.
+
+## Translations
+
+I only know two languages, Norwegian and English, and therefore there are only these two availale.
+
+If you want to help out with translation, please fork the project and copy the language files from **include/build.leia/language/**.
+
+The **en_US.inc** is the most up-to-date file. I haven't fixed the Norwegian one yet.
