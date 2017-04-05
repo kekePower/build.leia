@@ -94,7 +94,7 @@ fi
 
 # If the input is other that --help or --with, display the --help message and exit
 # This should prevent anyone from doing something they didn't want to.
-if [[ ${1} == "--help" || ! ${@} =~ "--with" ]]; then
+if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
 	exit
 fi
