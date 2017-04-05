@@ -1,7 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.1.0"
-TIMEBLOCK="${WHITE}[$(date +%T)]${END}"
+SCRIPT_VERSION="1.1.1"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -93,7 +92,7 @@ elif [[ ${@} =~ "--with" ]]; then
 	if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
 		include ${0:t}/clean
 		MSG="No clean option set. This is the default."
-		echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
 	fi
 
@@ -168,13 +167,13 @@ function git_pull () {
   fi
 	
 	MSG="${L_20} ${VKODI}${YesForce}"
-	echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
     
   if [[ ! ${NOGIT_IS_SET} ]]; then
 
 	MSG="${L_21} ${VKODI} ${L_22}"
-	echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 
 	builtin cd ${KODI}
@@ -188,7 +187,7 @@ function git_pull () {
 			fi
 		
     MSG="${VKODI} ${L_23} ${FORCED}"
-		echo "${TIMEBLOCK} ${ARROW} ${WARNING}${MSG}${END}"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
 		GITMSG="${VKODI} is already up to date. New build forced."
         
@@ -217,7 +216,7 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
     
 		if [[ ${CLEAN_IS_SET} ]]; then
 			MSG="Cleaning up old kodi-build"
-			echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
@@ -234,13 +233,13 @@ fi
 function configure_kodi () {
 		if [[ ${CLEAN_IS_SET} ]]; then
 			MSG="${L_31} ${VKODI}"
-			echo "${TIMEBLOCK} ${INFO}${MSG}${END}${FFMPEG}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
 			loggy ${MSG}
 			builtin cd ${KODI}/kodi-build
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 		elif [[ ${DIRTY_IS_SET} ]]; then
 			MSG="${L_31} ${VKODI}"
-			echo "${TIMEBLOCK} ${INFO}${MSG}${END}${FFMPEG}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
 			loggy ${MSG}
 			builtin cd ${KODI}/kodi-build
 		fi
@@ -249,7 +248,7 @@ function configure_kodi () {
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
 			MSG="${L_31} ${VKODI}"
-			echo "${TIMEBLOCK} ${INFO}${MSG}${END}${FFMPEG}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
 			loggy ${MSG}
       builtin cd ${KODI}/kodi-build
       cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
@@ -267,13 +266,13 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
     loggy ${MSG}
 		
     MSG="${L_33} ${VKODI}. ${L_34}"
-    echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
     loggy ${MSG}
     cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 
     if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
         MSG="${L_35} ${VKODI} ${L_36}"
-        echo "${TIMEBLOCK} ${ARROW} ${WARNING}${MSG}${END}"
+        echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
         loggy ${MSG}
 				FAILED="The nightly build of ${VKODI} failed."
     fi
@@ -288,7 +287,7 @@ function install_kodi () {
 
   if [[ ! ${FAILED} ]]; then
         MSG="${L_90} ${PREFIX}"
-        echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+        echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
         loggy ${MSG}
         builtin cd ${KODI}/kodi-build
         sudo make -s install >> ${LOGGYLOGFILE} 2>&1
@@ -303,7 +302,7 @@ if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
 	if [[ ! ${FAILED} ]]; then
 		if [[ ${CLEAN_IS_SET} ]]; then
 	    MSG="${L_91}"
-	    echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+	    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	    loggy ${MSG}
 			builtin cd ${KODI}
 	    sudo make -s -C \
@@ -313,7 +312,7 @@ if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
 		fi
 
 	    MSG="${L_92}"
-	    echo "${TIMEBLOCK} ${INFO}${MSG}${END}"
+	    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	    loggy ${MSG}
 	    sudo make -s -j${NUMCPU} -C \
 	    tools/depends/target/binary-addons \
@@ -336,6 +335,6 @@ if [[ ${LOCAL_IS_SET} ]]; then
 loggy "###################################################################"
 loggy "#             End of compilation for ${VKODI}                     #"
 loggy "###################################################################"
-echo "${TIMEBLOCK} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
-echo "${TIMEBLOCK} ${YELLOW}You can view the log output in this file: ${LOGGYLOGFILE}${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}You can view the log output in this file: ${LOGGYLOGFILE}${END}"
 fi
