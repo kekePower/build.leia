@@ -260,5 +260,5 @@ if [[ ${LOCAL_IS_SET} ]]; then
 		install_addons
 	fi
 
-echo "echo "${WHITE}[$(date +%T)]${END} ${INFO}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
+echo "${WHITE}[$(date +%T)]${END} ${INFO}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
 fi
