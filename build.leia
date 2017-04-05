@@ -196,24 +196,26 @@ rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
 
 }
 
-# Function: BUILD_KODI
-function build_kodi () {
+# Function: CLEAN_KODI
+function clean_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
 if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 
     MSG="${L_30} ${KODINAMEVERSION}"
     loggy ${MSG}
-
-    MSG="${L_31} ${VKODI}"
-    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
-    loggy ${MSG}
     
 		if [[ ${CLEAN_IS_SET} ]]; then
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}Cleaning up old kodi-build${END}"
+			MSG="Cleaning up old kodi-build"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			loggy ${MSG}
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
+			
+			MSG="${L_31} ${VKODI}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+			loggy ${MSG}
 			builtin cd ${KODI}/kodi-build
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 		elif [[ ${DIRTY_IS_SET} ]]; then
@@ -223,10 +225,28 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 		if [[ ${FRESH_INSTALL} ]]; then
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
-                        builtin cd ${KODI}/kodi-build
-                        cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
+			MSG="${L_31} ${VKODI}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+			loggy ${MSG}
+      builtin cd ${KODI}/kodi-build
+      cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		fi
+
+# End of the GITMSG check
+fi
+
+}
+
+# Function: BUILD_KODI
+function build_kodi () {
+
+# We check if we have a message from git_pull. If not, we continue the build
+if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
+
+    MSG="${L_30} ${KODINAMEVERSION}"
+    loggy ${MSG}
+		
     MSG="${L_33} ${VKODI}. ${L_34}"
     echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
     loggy ${MSG}
@@ -286,6 +306,7 @@ fi
 if [[ ${LOCAL_IS_SET} ]]; then
 	fetch_kodi
 	git_pull
+	clean_kodi
 	build_kodi
 	install_kodi
 	
