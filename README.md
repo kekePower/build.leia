@@ -56,3 +56,12 @@ I only know two languages, Norwegian and English, and therefore there are only t
 If you want to help out with translation, please fork the project and copy the language files from **include/build.leia/language/**.
 
 The **en_US.inc** is the most up-to-date file. I haven't fixed the Norwegian one yet.
+
+## The road ahead
+
+I've a lot of thoughts about how to make this script even more robust. At the moment they're basically just a mess in my head, but I'll try to plot them down in a coherent way.
+
+* I'd like to see a way for the script to check for known dependencies
+	* If some are missing, download them (git?), compile and install them
+	* The main problem here is that we can't really catch missing dependecies of these unless we go through all of them manually and set up some sort of order
+* More to come...
