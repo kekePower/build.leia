@@ -11,6 +11,14 @@ Default installation dir is **/opt/Leia**. This can be changed by editing the PR
 
 See **build.leia --help** for your options.
 
+### Requirements
+
+* Standard requirements for building [Kodi on Linux](https://github.com/xbmc/xbmc/blob/master/docs/README.linux)
+* [ZSH](http://www.zsh.org/)
+* [git](https://github.com/git/git)
+* You must be in the sudoers file
+	* Unless you want to install Kodi to your home directory. Then you'll have to edit the PREFIX setting and remove the sudo commands from the script.
+
 ## Options
 
 ### Fresh start
@@ -69,4 +77,5 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 * Make the installer more robust when it comes to updating.
 	* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.
 * Move the hardcoded text from build.leia into the language files
+* Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo
 * More to come...
