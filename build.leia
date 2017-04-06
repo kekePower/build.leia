@@ -143,7 +143,7 @@ function fetch_kodi () {
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
 				BINARY_ADDONS_INSTALL=1
 			else
-				echo "${L_106}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${L_106}${END}"
 			fi
 		else
 			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
