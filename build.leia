@@ -144,6 +144,7 @@ function fetch_kodi () {
 				BINARY_ADDONS_INSTALL=1
 			else
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${L_106}${END}"
+				BINARY_ADDONS_INSTALL=0
 			fi
 		else
 			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
@@ -302,28 +303,33 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
-	if [[ ! ${FAILED} ]]; then
-		if [[ ${CLEAN_IS_SET} ]]; then
-	    MSG="${L_91}"
-	    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-	    loggy ${MSG}
-			builtin cd ${KODI}
-	    sudo make -s -C \
-			tools/depends/target/binary-addons \
-			distclean \
-			> /dev/null 2>&1
+if [[ ${FRESH_INSTALL} && ${BINARY_ADDONS_INSTALL} ]]; then
+	if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
+		if [[ ! ${FAILED} ]]; then
+			if [[ ${CLEAN_IS_SET} ]]; then
+		    MSG="${L_91}"
+		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		    loggy ${MSG}
+				builtin cd ${KODI}
+		    sudo make -s -C \
+				tools/depends/target/binary-addons \
+				distclean \
+				> /dev/null 2>&1
+			fi
+
+		    MSG="${L_92}"
+		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		    loggy ${MSG}
+		    sudo make -s -j${NUMCPU} -C \
+		    tools/depends/target/binary-addons \
+		    PREFIX=${PREFIX} \
+		    >> ${LOGGYLOGFILE} 2>&1
 		fi
-
-	    MSG="${L_92}"
-	    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-	    loggy ${MSG}
-	    sudo make -s -j${NUMCPU} -C \
-	    tools/depends/target/binary-addons \
-	    PREFIX=${PREFIX} \
-	    >> ${LOGGYLOGFILE} 2>&1
-
 	fi
+else
+	MSG="${L_93}"
+	echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
+	loggy ${MSG}
 fi
 }
 

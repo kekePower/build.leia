@@ -46,6 +46,7 @@
   L_90="Installing Kodi locally to"
   L_91="Cleaning up binary-addons"
   L_92="Compiling and installing binary-addons"
+	L_93="You have chose not to install the binary-addons at this time."
 	
 	L_100="Setting defaults to"
 	L_101="You can't do a clean and dirty compilation at the same time."
