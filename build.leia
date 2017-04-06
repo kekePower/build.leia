@@ -336,8 +336,8 @@ build_kodi
 install_kodi
 install_addons
 
-loggy "###################################################################"
-loggy "#             End of compilation for ${VKODI}                     #"
-loggy "###################################################################"
+echo "###################################################################" >> ${LOGGYLOGFILE}
+echo "#             End of compilation for ${VKODI}                     #" >> ${LOGGYLOGFILE}
+echo "###################################################################" >> ${LOGGYLOGFILE}
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
