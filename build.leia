@@ -84,16 +84,22 @@ done
 # The default behavior is to do a clean,addons install
 # Same as build.leia --with=clean,addons
 if [[ ! ${@} ]]; then
+	MSG="${L_100} --with=clean,addons"
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
 	include ${0:t}/install
 	include ${0:t}/clean
 	include ${0:t}/addons
 elif [[ ${@} =~ "--with" ]]; then
 # We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
 	if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
-		include ${0:t}/clean
-		MSG="No clean option set. This is the default."
+		MSG="${L_100} --with=clean"
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
+		include ${0:t}/install
+		include ${0:t}/clean
+	else
+		include ${0:t}/install
 	fi
 
 fi
@@ -103,13 +109,6 @@ fi
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
 	exit
-fi
-
-# We set it to install automatically, no matter if --with=install is set or not
-# This is what we want...
-# This is only a temporary workaround until I find a smarter way of doing it...
-if [[ ! ${LOCAL_IS_SET} ]]; then
-	include ${0:t}/install
 fi
 
 VKODI=Leia
@@ -124,33 +123,33 @@ ARROW="${W}-${END}${INFO}>${END}"
 
 # This text needs to be added to the language files. Hardcoded for now...
 if [[ ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ]]; then
-	echo "${W}**${END} ${RED}You can't do a clean and dirty compilation at the same time.${END} ${W}**${END}"
-	echo "${W}**${END} ${RED}Please see \"${0:t} --help\" for more information.${END} \t${W}**${END}"
-	echo "${W}**${END} ${RED}Aborting!${END} \t\t\t\t\t\t\t${W}**${END}"
+	echo "${W}**${END} ${RED}${L_101}${END} ${W}**${END}"
+	echo "${W}**${END} ${RED}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
+	echo "${W}**${END} ${RED}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
 	exit
 fi
 
 # Function: FETCH_KODI
 function fetch_kodi () {
 	if [[ ! -d ${KODI} ]]; then
-		echo "Kodi source not found. Would you like me to fetch it? (Y/n) \c"
+		echo "${L_104} ${L_81} \c"
 		read answer
 		
-		if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
+		if [[ ${answer} == "" || ${answer} == "${L_82}" || ${answer} == "${L_83}" ]]; then
 			buildin cd ${KODIDIR} > /dev/null 2>&1
 			git clone https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
-			echo "Do you wish to compile and install the binary-addons? (Y/n) \c"
+			echo "${L_105} ${L_81} \c"
 			read binary-addons
 			
-			if [[ ${binary-addons} == "" || ${binary-addons} == "Y" || ${binary-addons} == "y" ]]; then
+			if [[ ${binary-addons} == "" || ${binary-addons} == "${L_82}" || ${binary-addons} == "${L_83}" ]]; then
 				BINARY_ADDONS_INSTALL=1
 			else
-				echo "OK. I will not install the addons for you."
+				echo "${L_106}"
 			fi
 		else
-			echo "\n ${ARROW} Please clone the Kodi source into ${KODI}"
+			echo "\n ${ARROW} ${L_107} ${KODI}"
 			echo "${ARROW} git clone https://github.com/xbmc/xbmc ${VKODI}"
-			echo "${ARROW} Aborting!"
+			echo "${ARROW} ${L_25}"
 			exit
 		fi
 	fi
@@ -189,10 +188,10 @@ function git_pull () {
     MSG="${VKODI} ${L_23} ${FORCED}"
 		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
-		GITMSG="${VKODI} is already up to date. New build forced."
+		GITMSG="${VKODI} ${L_108}"
         
 		if [[ ! ${FORCE_IS_SET} ]]; then
-      GITMSG="${VKODI} is already up to date. No new build at the moment."
+      GITMSG="${VKODI} ${L_109}"
 			exit
 		fi
 	fi
@@ -274,7 +273,7 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
         MSG="${L_35} ${VKODI} ${L_36}"
         echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
         loggy ${MSG}
-				FAILED="The nightly build of ${VKODI} failed."
+				FAILED="${L_110} ${VKODI} ${L_111}"
     fi
 
 # End of the GITMSG check
@@ -335,6 +334,6 @@ if [[ ${LOCAL_IS_SET} ]]; then
 loggy "###################################################################"
 loggy "#             End of compilation for ${VKODI}                     #"
 loggy "###################################################################"
-echo "${WHITE}[$(date +%T)]${END} ${YELLOW}All set. You can launch Kodi with the command: ${PREFIX}/bin/kodi${END}"
-echo "${WHITE}[$(date +%T)]${END} ${YELLOW}You can view the log output in this file: ${LOGGYLOGFILE}${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
 fi

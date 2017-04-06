@@ -19,12 +19,6 @@
   Help_26="\t${W}\$${END} ${2} --with=dirty"
   Help_27="\n${YELLOW}Scripted by Stig-Ørjan Smelror <smelror@gmail.com>${END}"
 	Help_28="${YELLOW}Source can be found at https://github.com/kekePower/build.leia${END}"
-
-	L_10="INFO:\nYou have to build Jarvis or Krypton by adding one as the first argument."
-  L_11="If you're using one of the options, Jarvis or Krypton has to be the second argument."
-	L_12="Please see"
-  L_13="for more information."
-  L_14="You can not use 'addons' without 'install'"
     
   L_20="Preparing daily version of"
 	L_21="Updating"
@@ -40,41 +34,28 @@
   L_34="Please be patient!"
   L_35="Build of"
   L_36="failed. Try again."
-
-  L_40="Can't build RPM for"
-  L_41="Binary not found."
-  L_42="Installing"
-  L_43="to"
-  L_44="Can't find"
-  L_45="source for RPM."
-  L_46="Copying"
-  L_47="Compressing"
-  L_48="Building the RPM for"
-  L_49="Cleaning up after the RPM build"
-
-  L_50="Moving the"
-  L_51="files to Dropbox"
-  L_52="Files to move to"
-  L_53="doesn't exist. Exiting!"
-
-  L_60="Updating the website"
-  L_61="Updating the download files"
-
-  L_70="Building of"
-  L_71="complete!"
-  L_72="RPM for"
-  L_73="built"
-  L_75="copied to Dropbox and index file updated!"
-  L_76="/index.html updated!"
-  L_77="RPM built and index.html updated!"
-  L_78="successfully built and published!"
     
   L_80="Deleting"
+	L_81="(Y/n)" # Yes or no
+	L_82="Y" # Yes
+	L_83="y" # yes
     
   L_90="Installing Kodi locally to"
   L_91="Cleaning up binary-addons"
   L_92="Compiling and installing binary-addons"
-  L_93="FFmpeg is already up-to-date"
-  L_94="FFmpeg updated from git"
-  L_95="Configuring and compiling FFmpeg"
-  L_96="Updating FFmpeg from git"
+	
+	L_100="Setting defaults to"
+	L_101="You can't do a clean and dirty compilation at the same time."
+	L_102="Please see"
+	L_103="for more information."
+	L_104="Kodi source not found. Would you like me to fetch it?"
+	L_105="Do you wish to compile and install the binary-addons?"
+	L_106="OK. I will not install the addons for you."
+	L_107="Please clone the Kodi source into"
+	L_108="is already up to date. New build forced."
+	L_109="is already up to date. No new build at the moment."
+	L_110="The nightly build of"
+	L_111="failed."
+	
+	L_120="All set. You can launch Kodi with the command"
+	L_121="You can view the log output in this file"

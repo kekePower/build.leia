@@ -76,6 +76,6 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 	* The main problem here is that we can't really catch missing dependecies of these unless we go through all of them manually and set up some sort of order
 * Make the installer more robust when it comes to updating.
 	* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.
-* Move the hardcoded text from build.leia into the language files
+* ~~Move the hardcoded text from build.leia into the language files~~
 * Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo
 * More to come...
