@@ -79,3 +79,8 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 * ~~Move the hardcoded text from build.leia into the language files~~
 * Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo
 * More to come...
+
+## Screenshots
+
+![build.leia Help](https://www.dropbox.com/s/u4jcgqm8kevzuvl/build.leia.help.png?dl=0)
+![build.leia Compile](https://www.dropbox.com/s/ff8uc36ec4e6fid/build.leia.compile.png?dl=0)
