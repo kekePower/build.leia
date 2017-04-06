@@ -14,7 +14,7 @@
 	Help_21="You can use any of these in combination, except ${W}clean${END} and ${W}dirty${END} together"
   Help_22="${W}Examples:${END}"
 	Help_23="Pulls from git, removes the build directory, builds and installs locally"
-  Help_24="\t\$ ${2} --with=clean"
+  Help_24="\t${W}\$${END} ${2} --with=clean"
 	Help_25="Pulls from git and compiles Leia (dirty)"
   Help_26="\t${W}\$${END} ${2} --with=dirty"
   Help_27="\n${YELLOW}Scripted by Stig-Ørjan Smelror <smelror@gmail.com>${END}"
