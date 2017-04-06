@@ -62,6 +62,11 @@
 	L_111="failed."
 	L_112="Cloning the Leia source from Github. Please wait..."
 	L_113="Cleaning up old kodi-build"
+	L_114="Having ccache installed will make compiling faster"
+	L_115="if you compile Leia often."
+	L_116="Cleaning up the ccache archive (ccache -C)"
+	L_117="Do you want to clear the ccache cache completely?"
+	L_118="Clearing the ccache cache will significantly increase build times."
 	
 	L_120="All set. You can launch Kodi with the command"
 	L_121="You can view the log output in this file"

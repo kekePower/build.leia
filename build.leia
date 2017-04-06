@@ -220,6 +220,17 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
+			if [[ $( which ccache ) ]]; then
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_117} ${L_81}${END} \c"
+				read emptyccache
+				if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
+					MSG="${L_116}"
+					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
+					loggy ${MSG}
+					ccache -C >> ${LOGGYLOGFILE} 2>&1
+				fi
+			fi
 		elif [[ ${DIRTY_IS_SET} ]]; then
 			builtin cd ${KODI}/kodi-build
 		fi
@@ -231,26 +242,35 @@ fi
 
 # Function: CONFIGURE_KODI
 function configure_kodi () {
+	
+	if [[ ! $( which ccache ) ]]; then
+		MSG="${L_114}"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
+    loggy ${MSG}
+		MSG="${L_115}"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
+    loggy ${MSG}
+	fi
 
 		if [[ ${FRESH_INSTALL} ]]; then
+			MSG="${L_31} ${VKODI} ${L_37}"
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			loggy ${MSG}
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
-			MSG="${L_31} ${VKODI} ${L_37}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
-			loggy ${MSG}
       builtin cd ${KODI}/kodi-build
       cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
 			if [[ ${CLEAN_IS_SET} ]]; then
 				MSG="${L_31} ${VKODI} ${L_38}"
-				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			elif [[ ${DIRTY_IS_SET} ]]; then
 				MSG="${L_20} ${VKODI} ${L_39}"
-				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 			fi
