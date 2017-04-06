@@ -145,6 +145,7 @@ function fetch_kodi () {
 			else
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${L_106}${END}"
 				BINARY_ADDONS_INSTALL=0
+				ADDON_IS_SET=0
 			fi
 		else
 			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
@@ -303,7 +304,6 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-if [[ ${FRESH_INSTALL} && ${BINARY_ADDONS_INSTALL} ]]; then
 	if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
 		if [[ ! ${FAILED} ]]; then
 			if [[ ${CLEAN_IS_SET} ]]; then
@@ -325,12 +325,11 @@ if [[ ${FRESH_INSTALL} && ${BINARY_ADDONS_INSTALL} ]]; then
 		    PREFIX=${PREFIX} \
 		    >> ${LOGGYLOGFILE} 2>&1
 		fi
+	else
+		MSG="${L_93}"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
+		loggy ${MSG}
 	fi
-else
-	MSG="${L_93}"
-	echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
-	loggy ${MSG}
-fi
 }
 
 # Here we run all of our functions in turn
