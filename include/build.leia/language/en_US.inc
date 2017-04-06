@@ -27,7 +27,7 @@
   L_24="Forced to continue."
   L_25="Aborting!"
     
-  L_30="Starting build process for"
+  L_30="Starting build process"
   L_31="Configuring"
 	L_32="Running bootstrap"
   L_33="Compiling"
