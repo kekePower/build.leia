@@ -34,6 +34,9 @@
   L_34="Please be patient!"
   L_35="Build of"
   L_36="failed. Try again."
+	L_37="(fresh)"
+	L_38="(clean)"
+	L_39="(dirty)"
     
   L_80="Deleting"
 	L_81="(Y/n)" # Yes or no
@@ -56,6 +59,8 @@
 	L_109="is already up to date. No new build at the moment."
 	L_110="The nightly build of"
 	L_111="failed."
+	L_112="Cloning the Leia source from Github. Please wait..."
+	L_113="Cleaning up old kodi-build"
 	
 	L_120="All set. You can launch Kodi with the command"
 	L_121="You can view the log output in this file"

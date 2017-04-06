@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.2.0"
+SCRIPT_VERSION="1.2.1"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -132,24 +132,27 @@ fi
 # Function: FETCH_KODI
 function fetch_kodi () {
 	if [[ ! -d ${KODI} ]]; then
-		echo "${L_104} ${L_81} \c"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_104} ${L_81}${END} \c"
 		read answer
 		
 		if [[ ${answer} == "" || ${answer} == "${L_82}" || ${answer} == "${L_83}" ]]; then
-			buildin cd ${KODIDIR} > /dev/null 2>&1
-			git clone https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
-			echo "${L_105} ${L_81} \c"
-			read binary-addons
+			builtin cd ${KODIDIR} > /dev/null 2>&1
+			MSG=${L_112}
+			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			loggy ${MSG}
+			git clone -b master https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
+			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_105} ${L_81}${END} \c"
+			read binaryaddons
 			
-			if [[ ${binary-addons} == "" || ${binary-addons} == "${L_82}" || ${binary-addons} == "${L_83}" ]]; then
+			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
 				BINARY_ADDONS_INSTALL=1
 			else
 				echo "${L_106}"
 			fi
 		else
-			echo "\n ${ARROW} ${L_107} ${KODI}"
-			echo "${ARROW} git clone https://github.com/xbmc/xbmc ${VKODI}"
-			echo "${ARROW} ${L_25}"
+			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
+			echo "${ARROW} ${YELLOW}git clone https://github.com/xbmc/xbmc ${VKODI}${END}"
+			echo "${ARROW} ${WARNING}${L_25}${END}"
 			exit
 		fi
 	fi
@@ -159,7 +162,8 @@ FRESH_INSTALL=1
 
 # Function: GIT_PULL
 function git_pull () {
-
+if [[ ! ${FRESH_INSTALL} ]]; then
+	
   if [[ ${FORCE_IS_SET} ]]; then
       local YesForce
       YesForce=" (${L_24})"
@@ -202,6 +206,7 @@ loggy "##############################################################"
 cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
 rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
 
+fi
 }
 
 # Function: CLEAN_KODI
@@ -212,9 +217,10 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 
     MSG="${L_30} ${KODINAMEVERSION}"
     loggy ${MSG}
-    
+  
+	if [[ ! ${FRESH_INSTALL} ]]; then
 		if [[ ${CLEAN_IS_SET} ]]; then
-			MSG="Cleaning up old kodi-build"
+			MSG="${L_113}"
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
@@ -223,6 +229,7 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 		elif [[ ${DIRTY_IS_SET} ]]; then
 			builtin cd ${KODI}/kodi-build
 		fi
+	fi
 # End of the GITMSG check
 fi
 
@@ -230,29 +237,31 @@ fi
 
 # Function: CONFIGURE_KODI
 function configure_kodi () {
-		if [[ ${CLEAN_IS_SET} ]]; then
-			MSG="${L_31} ${VKODI}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
-			loggy ${MSG}
-			builtin cd ${KODI}/kodi-build
-			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
-		elif [[ ${DIRTY_IS_SET} ]]; then
-			MSG="${L_31} ${VKODI}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
-			loggy ${MSG}
-			builtin cd ${KODI}/kodi-build
-		fi
 
 		if [[ ${FRESH_INSTALL} ]]; then
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
-			MSG="${L_31} ${VKODI}"
+			MSG="${L_31} ${VKODI} ${L_37}"
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
 			loggy ${MSG}
       builtin cd ${KODI}/kodi-build
       cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
+		else
+			if [[ ${CLEAN_IS_SET} ]]; then
+				MSG="${L_31} ${VKODI} ${L_38}"
+				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+				loggy ${MSG}
+				builtin cd ${KODI}/kodi-build
+				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
+			elif [[ ${DIRTY_IS_SET} ]]; then
+				MSG="${L_20} ${VKODI} ${L_39}"
+				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}${FFMPEG}"
+				loggy ${MSG}
+				builtin cd ${KODI}/kodi-build
+			fi
 		fi
+
 }
 
 # Function: BUILD_KODI
