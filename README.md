@@ -82,5 +82,5 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 
 ## Screenshots
 
-![build.leia Help](https://www.dropbox.com/s/u4jcgqm8kevzuvl/build.leia.help.png)
-![build.leia Compile](https://www.dropbox.com/s/ff8uc36ec4e6fid/build.leia.compile.png)
+![build.leia Help](https://dl.dropboxusercontent.com/u/15356427/build.leia.help.png)
+![build.leia Compile](https://dl.dropboxusercontent.com/u/15356427/build.leia.compile.png)
