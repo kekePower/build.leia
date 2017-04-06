@@ -65,7 +65,7 @@ fi
 
 function ShowHelp () {
 	# Usage: ShowHelp ${0:t}
-    for i in {10..22}
+    for i in {10..27}
     do
         help=Help_${i}
         eval echo \$${help}
