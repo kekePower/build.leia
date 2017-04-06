@@ -87,7 +87,6 @@ if [[ ! ${@} ]]; then
 	MSG="${L_100} --with=clean,addons"
 	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
-	include ${0:t}/install
 	include ${0:t}/clean
 	include ${0:t}/addons
 elif [[ ${@} =~ "--with" ]]; then
@@ -96,10 +95,7 @@ elif [[ ${@} =~ "--with" ]]; then
 		MSG="${L_100} --with=clean"
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		include ${0:t}/install
 		include ${0:t}/clean
-	else
-		include ${0:t}/install
 	fi
 
 fi
@@ -180,7 +176,7 @@ if [[ ! ${FRESH_INSTALL} ]]; then
 	loggy ${MSG}
 
 	builtin cd ${KODI}
-  	git pull > /tmp/build.leia.gitpull 2>&1
+  git pull > /tmp/build.leia.gitpull 2>&1
     
     if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
 			if [[ ${FORCE_IS_SET} ]]; then
@@ -199,7 +195,7 @@ if [[ ! ${FRESH_INSTALL} ]]; then
 			exit
 		fi
 	fi
-  fi
+fi
 
 # Removing the temp git pull file
 loggy "##############################################################"
@@ -326,23 +322,22 @@ if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
 	    tools/depends/target/binary-addons \
 	    PREFIX=${PREFIX} \
 	    >> ${LOGGYLOGFILE} 2>&1
+
 	fi
 fi
 }
 
-
-if [[ ${LOCAL_IS_SET} ]]; then
-	fetch_kodi
-	git_pull
-	clean_kodi
-	configure_kodi
-	build_kodi
-	install_kodi
-	install_addons
+# Here we run all of our functions in turn
+fetch_kodi
+git_pull
+clean_kodi
+configure_kodi
+build_kodi
+install_kodi
+install_addons
 
 loggy "###################################################################"
 loggy "#             End of compilation for ${VKODI}                     #"
 loggy "###################################################################"
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
-fi
