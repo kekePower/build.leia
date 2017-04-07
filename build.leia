@@ -184,37 +184,36 @@ if ! ${FRESH_INSTALL} ; then
 	loggy ${MSG}
     
   if ! ${NOGIT_IS_SET} ; then
-
-	MSG="${L_21} ${VKODI} ${L_22}"
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-	loggy ${MSG}
-
-	builtin cd ${KODI}
-  git pull > /tmp/build.leia.gitpull 2>&1
-    
-    if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
-			if ${FORCE_IS_SET} ; then
-				FORCED="${L_24}"
-			else
-				FORCED="${L_25}"
-			fi
-		
-    MSG="${VKODI} ${L_23} ${FORCED}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		MSG="${L_21} ${VKODI} ${L_22}"
+		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		GITMSG="${VKODI} ${L_108}"
-        
-		if ! ${FORCE_IS_SET} ; then
-      GITMSG="${VKODI} ${L_109}"
-			exit
-		fi
-	fi
-fi
 
-# Removing the temp git pull file
-loggy "##############################################################"
-cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
-rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
+		builtin cd ${KODI}/kodi-build
+	  git pull > /tmp/build.leia.gitpull 2>&1
+  
+	    if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
+				if ${FORCE_IS_SET} ; then
+					FORCED="${L_24}"
+				else
+					FORCED="${L_25}"
+				fi
+	
+		    MSG="${VKODI} ${L_23} ${FORCED}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+				loggy ${MSG}
+				GITMSG="${VKODI} ${L_108}"
+  
+				if ! ${FORCE_IS_SET} ; then
+		      GITMSG="${VKODI} ${L_109}"
+					exit
+				fi
+			fi
+	fi
+
+	# Removing the temp git pull file
+	loggy "##############################################################"
+	cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
+	rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
 
 fi
 }
