@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.2.4"
+SCRIPT_VERSION="1.3.0"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -24,7 +24,7 @@ function include () {
 
 include common/colors
 include common/numcpu
-include common/with_to_array
+include common/input_to_array
 
 # We load the configuration file
 . ${0:a:h}/etc/${0:t}.conf
@@ -73,32 +73,21 @@ function ShowHelp () {
 	exit
 }
 
-# Initialze the array in the function WithToArray before use
+# We set all the variables used to false
+ADDON_IS_SET=false
+CLEAN_IS_SET=false
+DIRTY_IS_SET=false
+FORCE_IS_SET=false
+NOGIT_IS_SET=false
+FRESH_INSTALL=false
+
+# Initialze the array in the function InputToArray before use
 # Options are: --with=clean,dirty,addons,no-git,force
-WithToArray ${@}
-for i in ${WithArray}
+InputToArray ${@}
+for i in ${InputArray}
 do
     include ${0:t}/${i}
 done
-
-# The default behavior is to do a clean,addons install
-# Same as build.leia --with=clean,addons
-if [[ ! ${@} ]]; then
-	MSG="${L_100} --with=clean,addons"
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-	loggy ${MSG}
-	include ${0:t}/clean
-	include ${0:t}/addons
-elif [[ ${@} =~ "--with" ]]; then
-# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
-	if [[ ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ]]; then
-		MSG="${L_100} --with=clean"
-		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		loggy ${MSG}
-		include ${0:t}/clean
-	fi
-
-fi
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
@@ -115,9 +104,32 @@ PREFIX="/opt/${VKODI}"
 KODI=${KODIDIR}/${VKODI}
 ARROW="${W}-${END}${INFO}>${END}"
 
+MSG="Welcome to ${0:t} v${SCRIPT_VERSION}"
+echo "${WHITE}[$(date +%T)]${END} ${W}${MSG}${END}"
+loggy ${MSG}
+
+# The default behavior is to do a clean,addons install
+# Same as build.leia --with=clean,addons
+if [[ ! ${@} ]]; then
+	MSG="${L_100} --with=clean,addons"
+	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
+	include ${0:t}/clean
+	include ${0:t}/addons
+elif [[ ${@} =~ "--with" ]]; then
+# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
+	if ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
+		MSG="${L_100} --with=clean"
+		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
+		include ${0:t}/clean
+	fi
+
+fi
+
 # We check to see if clean and dirty are set at the same time.
 # This is not wanted and the script will exit if found.
-if [[ ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ]]; then
+if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 	echo "${W}**${END} ${RED}${L_101}${END} ${W}**${END}"
 	echo "${W}**${END} ${RED}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
 	echo "${W}**${END} ${RED}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
@@ -136,15 +148,18 @@ function fetch_kodi () {
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			git clone -b master https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
+			
+			# We need to set a variable here so that we know it's a fresh copy
+			FRESH_INSTALL=true
+			
 			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_105} ${L_81}${END} \c"
 			read binaryaddons
 			
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
-				BINARY_ADDONS_INSTALL=1
+				ADDON_IS_SET=true
 			else
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${L_106}${END}"
-				BINARY_ADDONS_INSTALL=0
-				ADDON_IS_SET=0
+				ADDON_IS_SET=false
 			fi
 		else
 			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
@@ -153,15 +168,13 @@ function fetch_kodi () {
 			exit
 		fi
 	fi
-# We need to set a variable here so that we know it's a fresh copy
-FRESH_INSTALL=1
 }
 
 # Function: GIT_PULL
 function git_pull () {
-if [[ ! ${FRESH_INSTALL} ]]; then
+if ! ${FRESH_INSTALL} ; then
 	
-  if [[ ${FORCE_IS_SET} ]]; then
+  if ${FORCE_IS_SET} ; then
       local YesForce
       YesForce=" (${L_24})"
   fi
@@ -170,7 +183,7 @@ if [[ ! ${FRESH_INSTALL} ]]; then
 	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
     
-  if [[ ! ${NOGIT_IS_SET} ]]; then
+  if ! ${NOGIT_IS_SET} ; then
 
 	MSG="${L_21} ${VKODI} ${L_22}"
 	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -180,7 +193,7 @@ if [[ ! ${FRESH_INSTALL} ]]; then
   git pull > /tmp/build.leia.gitpull 2>&1
     
     if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
-			if [[ ${FORCE_IS_SET} ]]; then
+			if ${FORCE_IS_SET} ; then
 				FORCED="${L_24}"
 			else
 				FORCED="${L_25}"
@@ -191,7 +204,7 @@ if [[ ! ${FRESH_INSTALL} ]]; then
 		loggy ${MSG}
 		GITMSG="${VKODI} ${L_108}"
         
-		if [[ ! ${FORCE_IS_SET} ]]; then
+		if ! ${FORCE_IS_SET} ; then
       GITMSG="${VKODI} ${L_109}"
 			exit
 		fi
@@ -210,10 +223,10 @@ fi
 function clean_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
-if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
+if [[ ! ${GITMSG} ]]; then
   
-	if [[ ! ${FRESH_INSTALL} ]]; then
-		if [[ ${CLEAN_IS_SET} ]]; then
+	if ! ${FRESH_INSTALL} ; then
+		if ${CLEAN_IS_SET} ; then
 			MSG="${L_113}"
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
@@ -222,6 +235,7 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 			mkdir kodi-build > /dev/null 2>&1
 			if [[ $( which ccache ) ]]; then
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_119}${END}"
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_117} ${L_81}${END} \c"
 				read emptyccache
 				if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
@@ -231,8 +245,20 @@ if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
 					ccache -C >> ${LOGGYLOGFILE} 2>&1
 				fi
 			fi
-		elif [[ ${DIRTY_IS_SET} ]]; then
+		elif ${DIRTY_IS_SET} ; then
 			builtin cd ${KODI}/kodi-build
+		fi
+	else
+		if [[ $( which ccache ) ]]; then
+			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
+			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_117} ${L_81}${END} \c"
+			read emptyccache
+			if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
+				MSG="${L_116}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
+				loggy ${MSG}
+				ccache -C >> ${LOGGYLOGFILE} 2>&1
+			fi
 		fi
 	fi
 # End of the GITMSG check
@@ -252,7 +278,7 @@ function configure_kodi () {
     loggy ${MSG}
 	fi
 
-		if [[ ${FRESH_INSTALL} ]]; then
+		if ${FRESH_INSTALL} ; then
 			MSG="${L_31} ${VKODI} ${L_37}"
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
@@ -262,13 +288,13 @@ function configure_kodi () {
       cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
-			if [[ ${CLEAN_IS_SET} ]]; then
+			if ${CLEAN_IS_SET} ; then
 				MSG="${L_31} ${VKODI} ${L_38}"
 				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
-			elif [[ ${DIRTY_IS_SET} ]]; then
+			elif ${DIRTY_IS_SET} ; then
 				MSG="${L_20} ${VKODI} ${L_39}"
 				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
@@ -282,7 +308,7 @@ function configure_kodi () {
 function build_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
-if [[ ! ${GITMSG} ]] || [[ ! ${FAILED} ]]; then
+if [[ ! ${GITMSG} ]]; then
 
     MSG="${L_30} ${VKODI}"
     loggy ${MSG}
@@ -320,9 +346,9 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-	if [[ ${ADDON_IS_SET} || ${BINARY_ADDONS_INSTALL} ]]; then
+	if ${ADDON_IS_SET} ; then
 		if [[ ! ${FAILED} ]]; then
-			if [[ ${CLEAN_IS_SET} ]]; then
+			if ${CLEAN_IS_SET} ; then
 		    MSG="${L_91}"
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
@@ -340,10 +366,15 @@ function install_addons () {
 		    tools/depends/target/binary-addons \
 		    PREFIX=${PREFIX} \
 		    >> ${LOGGYLOGFILE} 2>&1
+				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | cut -d: -f2 )
+				if [[ ! ${NOTBUILT} == "" ]]; then
+					MSG="${L_94}: ${NOTBUILT}"
+					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
+				fi
 		fi
 	else
 		MSG="${L_93}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
+		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
 		loggy ${MSG}
 	fi
 }

@@ -1,1 +1,1 @@
-NOGIT_IS_SET=1
+NOGIT_IS_SET=true

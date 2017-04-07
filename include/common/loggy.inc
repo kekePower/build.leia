@@ -2,6 +2,6 @@
 # Usage: loggy <message>
 function loggy () {
   
-	echo "$$ - $(date +%T) - ${VKODI} - ${@}" >> $LOGGYLOGFILE
+	echo "$$ - $(date +%T) - ${VKODI} - ${@}" >> ${LOGGYLOGFILE}
 
 }

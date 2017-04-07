@@ -1,1 +1,1 @@
-CLEAN_IS_SET=1
+CLEAN_IS_SET=true

@@ -46,7 +46,8 @@
   L_90="Installing Kodi locally to"
   L_91="Cleaning up binary-addons"
   L_92="Compiling and installing binary-addons"
-	L_93="You have chose not to install the binary-addons at this time."
+	L_93="You have chosen not to install the binary-addons at this time."
+	L_94="Addons failed to build"
 	
 	L_100="Setting defaults to"
 	L_101="You can't do a clean and dirty compilation at the same time."
@@ -67,6 +68,7 @@
 	L_116="Cleaning up the ccache archive (ccache -C)"
 	L_117="Do you want to clear the ccache cache completely?"
 	L_118="Clearing the ccache cache will significantly increase build times."
+	L_119="It will also make sure you build Kodi with the latest libraries."
 	
 	L_120="All set. You can launch Kodi with the command"
 	L_121="You can view the log output in this file"
