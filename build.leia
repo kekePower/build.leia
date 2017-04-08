@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.3.0"
+SCRIPT_VERSION="1.3.1"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -98,7 +98,7 @@ fi
 VKODI=Leia
 
 # Edit this to install to another directory
-PREFIX="/opt/${VKODI}"
+PREFIX="/opt/${VKODI:l}"
 #
 
 KODI=${KODIDIR}/${VKODI}
@@ -250,6 +250,7 @@ if [[ ! ${GITMSG} ]]; then
 	else
 		if [[ $( which ccache ) ]]; then
 			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
+      echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_119}${END}"
 			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_117} ${L_81}${END} \c"
 			read emptyccache
 			if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
@@ -337,7 +338,7 @@ function install_kodi () {
         echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
         loggy ${MSG}
         builtin cd ${KODI}/kodi-build
-        sudo make -s install >> ${LOGGYLOGFILE} 2>&1
+        sudo make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 	loggy "#########################################################"
   fi
 
