@@ -81,14 +81,6 @@ FORCE_IS_SET=false
 NOGIT_IS_SET=false
 FRESH_INSTALL=false
 
-# Initialze the array in the function InputToArray before use
-# Options are: --with=clean,dirty,addons,no-git,force
-InputToArray ${@}
-for i in ${InputArray}
-do
-    include ${0:t}/${i}
-done
-
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
@@ -117,7 +109,16 @@ if [[ ! ${@} ]]; then
 	include ${0:t}/clean
 	include ${0:t}/addons
 elif [[ ${@} =~ "--with" ]]; then
-# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
+
+  # Initialze the array in the function InputToArray before use
+  # Options are: --with=clean,dirty,addons,no-git,force
+  InputToArray ${@}
+  for i in ${InputArray}
+  do
+    include ${0:t}/${i}
+  done
+
+  # We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
 	if ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
 		MSG="${L_100} --with=clean"
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
