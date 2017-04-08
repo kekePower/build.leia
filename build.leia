@@ -74,7 +74,7 @@ function ShowHelp () {
 }
 
 # We set all the variables used to false
-ADDON_IS_SET=false
+ADDONS_IS_SET=false
 CLEAN_IS_SET=false
 DIRTY_IS_SET=false
 FORCE_IS_SET=false
@@ -118,12 +118,13 @@ elif [[ ${@} =~ "--with" ]]; then
     include ${0:t}/${i}
   done
 
-  # We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
-	if ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
-		MSG="${L_100} --with=clean"
+  # We default to doing a dirty install if not --with=clean is set and if --with=dirty is not set
+  # This will decrease build times
+	if ! ${CLEAN_IS_SET} || ! ${DIRTY_IS_SET} ; then
+		MSG="${L_100} --with=dirty"
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		include ${0:t}/clean
+		include ${0:t}/dirty
 	fi
 
 fi
@@ -157,10 +158,10 @@ function fetch_kodi () {
 			read binaryaddons
 			
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
-				ADDON_IS_SET=true
+				ADDONS_IS_SET=true
 			else
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${L_106}${END}"
-				ADDON_IS_SET=false
+				ADDONS_IS_SET=false
 			fi
 		else
 			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
@@ -347,7 +348,7 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-	if ${ADDON_IS_SET} ; then
+	if ${ADDONS_IS_SET} ; then
 		if [[ ! ${FAILED} ]]; then
 			if ${CLEAN_IS_SET} ; then
 		    MSG="${L_91}"
