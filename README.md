@@ -27,6 +27,14 @@ The script will first check to see if you have the Kodi Leia source in the direc
 
 It will then ask you if you also want to compile the binary-addons later.
 
+## Getting the source
+
+If you want to be on the cutting-edge, you can download the **master** branch. This will have a lot of bugs until the next major version is released.
+
+To get the latest, stable version, please use the **v1.x** branch.
+
+**git clone -b v1.x https://github.com/kekePower/build.leia**
+
 ### Command line options
 
 **build.leia** - The default is the same as **build.leia --with=clean,addons**
