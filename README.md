@@ -25,7 +25,7 @@ If you want to be on the cutting-edge, you can download the **master** branch. T
 
 To get the latest, stable version, please use the **v1.x** branch.
 
-> **git clone -b v1.x https://github.com/kekePower/build.leia**
+> **git clone -b v1.x https://github&#46;com/kekePower/build.leia**
 
 ## Options
 
