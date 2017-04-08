@@ -8,7 +8,7 @@ if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Script aborted."
     exit
 fi
-    
+
 # This function is used to include common sets of files used
 # Edit the path to reflect your installation
 function include () {
@@ -368,7 +368,7 @@ function install_addons () {
 		    >> ${LOGGYLOGFILE} 2>&1
 				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | cut -d: -f2 )
 				if [[ ! ${NOTBUILT} == "" ]]; then
-					MSG="${L_94}: ${NOTBUILT}"
+					MSG="${L_94}:${NOTBUILT}"
 					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
 				fi
 		fi
