@@ -19,6 +19,14 @@ See **build.leia --help** for your options.
 * You must be in the sudoers file
 	* Unless you want to install Kodi to your home directory. Then you'll have to edit the PREFIX setting and remove the sudo commands from the script.
 
+## Getting the source
+
+If you want to be on the cutting-edge, you can download the **master** branch. This will have a lot of bugs until the next major version is released.
+
+To get the latest, stable version, please use the **v1.x** branch.
+
+**git clone -b v1.x https://github.com/kekePower/build.leia**
+
 ## Options
 
 ### Fresh start
