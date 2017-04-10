@@ -30,7 +30,6 @@
     
   L_30="Starting build process"
   L_31="Configuring"
-	L_32="Running bootstrap"
   L_33="Compiling"
   L_34="Please be patient!"
   L_35="Build of"
