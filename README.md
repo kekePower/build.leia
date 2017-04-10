@@ -55,6 +55,8 @@ Your options are:
 
 **--with=force** - This will compile Kodi even if there are no new updates from Github.
 
+**--with=no-ccache** - Disable ccache when configuring Kodi
+
 You can use any of these options together, except from **clean** and **dirty**.
 
 **build.leia --with=clean,addons,force** will remove the **kodi-build** directory, recreate it, check to see if there are updates from Github and even if there are no new updates, it will continue with the compilation and lastly it will do a **distclean** for the binary-addons and re-compile them.
