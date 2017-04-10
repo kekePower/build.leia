@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.3.1"
+SCRIPT_VERSION="1.3.2"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -147,7 +147,7 @@ function fetch_kodi () {
 			MSG=${L_112}
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			git clone -b master https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
+			git clone -b master ${SOURCE} ${VKODI} >> ${LOGGYLOGFILE} 2>&1
 			
 			# We need to set a variable here so that we know it's a fresh copy
 			FRESH_INSTALL=true
@@ -163,7 +163,7 @@ function fetch_kodi () {
 			fi
 		else
 			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
-			echo "${ARROW} ${YELLOW}git clone https://github.com/xbmc/xbmc ${VKODI}${END}"
+			echo "${ARROW} ${YELLOW}git clone ${SOURCE} ${VKODI}${END}"
 			echo "${ARROW} ${WARNING}${L_25}${END}"
 			exit
 		fi
@@ -389,7 +389,7 @@ install_kodi
 install_addons
 
 echo "###################################################################" >> ${LOGGYLOGFILE}
-echo "#             End of compilation for ${VKODI}                     #" >> ${LOGGYLOGFILE}
+echo "#             End of compilation for ${VKODI}                         #" >> ${LOGGYLOGFILE}
 echo "###################################################################" >> ${LOGGYLOGFILE}
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
 echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
