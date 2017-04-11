@@ -50,7 +50,7 @@
 	L_93="You have chosen not to install the binary-addons at this time."
 	L_94="Addons failed to build"
 	
-	L_100="Setting defaults to"
+	L_100="Setting defaults to include"
 	L_101="You can't do a clean and dirty compilation at the same time."
 	L_102="Please see"
 	L_103="for more information."

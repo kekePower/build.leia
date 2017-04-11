@@ -188,7 +188,8 @@ if ! ${FRESH_INSTALL} ; then
   if ! ${NOGIT_IS_SET} ; then
 
 		builtin cd ${KODI}/kodi-build
-		git status -u master >> /tmp/build.leia.gitpull 2>&1
+		git remote update >> ${LOGGYLOGFILE} 2>&1
+		git status -uno >> /tmp/build.leia.gitpull 2>&1
 		echo "##############################################################" >> ${LOGGYLOGFILE} 2>&1
 		cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
 
