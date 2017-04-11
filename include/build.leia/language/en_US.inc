@@ -21,11 +21,11 @@
   Help_28="\n${YELLOW}Scripted by Stig-Ørjan Smelror <smelror@gmail.com>${END}"
 	Help_29="${YELLOW}Source can be found at https://github.com/kekePower/build.leia${END}"
     
-  L_20="Preparing daily version of"
+  L_20="Checking for updates for"
 	L_21="Updating"
   L_22="from git"
 	L_23="is already up to date."
-  L_24="Forced to continue."
+  L_24="Forced option is set."
   L_25="Aborting!"
     
   L_30="Starting build process"
