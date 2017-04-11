@@ -138,6 +138,30 @@ if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 	exit
 fi
 
+# Function: DETECT_LINUX_DIST
+function detect_linux_dist () {
+
+	if [[ $( which lsb_release ) ]]; then
+		DIST_NAME=$( lsb_release -i | cut -d: -f2 )
+		DIST_NAME=${DIST_NAME//[[:space:]]/}
+		set -- ${DIST_NAME}
+		DIST_NAME=$*
+		DIST_NAME=${DIST_NAME:l}
+
+		echo ${DIST_NAME}
+
+		if [[ -f ${INCLUDEDIR}/depends/dist/${DIST_NAME}.inc ]]; then
+			# include depends/dist/${DIST_NAME}
+			cat ${INCLUDEDIR}/depends/dist/${DIST_NAME}.inc
+		else
+			echo "Could not find configuration for ${DIST_NAME}"
+		fi
+		exit
+	fi
+
+
+}
+
 # This will check if ccache is installed
 # If it isn't, it will ask if you want to download from source, build and install it
 # Since we're building Kodi v18 Leia, we're also using the latest ccache from Github
@@ -441,6 +465,7 @@ function install_addons () {
 }
 
 # Here we run all of our functions in turn
+detect_linux_dist
 fetch_kodi
 git_pull
 clean_kodi
