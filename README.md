@@ -5,9 +5,9 @@ This is a complete hack to fetch(clone), update(pull), compile and install [Kodi
 
 I wrote this script to automate the compilation of Kodi on my Linux system. It checks if you have the source, if you don't it will as if you want to download it. Then it asks if you want to compile and install the binary-addons.
 
-Kodi Leia v18 uses cmake and checks for installled libraries atomatically without the need to specify the during configuration. Compared to configuring Kodi Krypton v17, it's a lot easier and feels more bullet proof.
+Kodi Leia v18 uses cmake and checks for installled libraries atomatically without the need to specify them during configuration. Compared to configuring Kodi Krypton v17, it's a lot easier and feels more bullet proof.
 
-Also, the introduction to using ccache speeds up build times after the first compilation. I've introduced an option that will disable ccache if you want to compile Kodi with a sort of clean slate (in lack of words...).
+Also, the introduction to using ccache speeds up build times after the first compilation. I've introduced an option that will disable ccache if you want to compile Kodi with a sort of clean slate (for a lack of words...).
 
 It uses the Z Shell (ZSH) as I find it more than capable for my needs.
 
