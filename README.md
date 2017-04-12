@@ -83,7 +83,7 @@ I only know two languages, Norwegian and English, and therefore there are only t
 
 If you want to help out with translation, please fork the project and copy the language files from **include/build.leia/language/**.
 
-The **en_US.inc** is the most up-to-date file. I haven't fixed the Norwegian one yet.
+The **en_US.inc** is the most up-to-date file.
 
 ## The road ahead
 

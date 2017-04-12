@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.3.7"
+SCRIPT_VERSION="1.3.8"
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
     echo "Please edit the configuration file located at"
@@ -420,7 +420,7 @@ function install_addons () {
 					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				fi
 		else
-			MSG="Could not find Kodi. Please run \"build.leia --help\" for more information."
+			MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
 			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			loggy ${MSG}
 			exit

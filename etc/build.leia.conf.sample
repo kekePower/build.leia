@@ -20,7 +20,7 @@ LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)"
 
 # Language option.
 # Supports
-# * Norwegian (no_NB) - Not up-to-date at the moment.
+# * Norwegian (no_NB)
 # * English (en_US)
 #
 MyLANG=en_US
