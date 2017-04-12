@@ -57,6 +57,8 @@ Your options are:
 
 **--with=no-ccache** - Disable ccache when configuring Kodi
 
+**--with=only-addons** - Will clean and compile and install the binary-addons only
+
 You can use any of these options together, except from **clean** and **dirty**.
 
 **build.leia --with=clean,addons,force** will remove the **kodi-build** directory, recreate it, check to see if there are updates from Github and even if there are no new updates, it will continue with the compilation and lastly it will do a **distclean** for the binary-addons and re-compile them.
