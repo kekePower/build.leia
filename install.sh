@@ -12,16 +12,16 @@ if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 
 	echo "Copying files to ~/bin/"
 	cp -f build.leia ~/bin/
-	if [[ ! $( grep REMOVEME ~/bin/etc/build.leia.conf ) ]]; then
-		echo "Please review ~/bin/etc/build.leia.conf.new for changes and/or updates"
-		cp -f etc/build.leia.conf ~/bin/etc/build.leia.conf.new
+	if [[ $( cat ~/bin/etc/build.leia.conf | head -1 ) != $( cat etc/build.leia.conf.sample | head -1 ) ]]; then
+		echo "Please review ~/bin/etc/build.leia.conf.sample for changes and/or updates"
+		cp -f etc/build.leia.conf.sample ~/bin/etc/build.leia.conf.sample
 	else
 		cp -af etc ~/bin/
 	fi
 	cp -af include ~/bin/
 	chmod 750 ~/bin/build.leia
 	echo "build.leia is installed."
-	echo "Please edit ~/bin/etc/build.leia.conf before running the script."
+	echo "Please edit ~/bin/etc/build.leia.conf.sample before running the script."
 	echo "Please run \"build.leia --help\" to see your options"
 	echo "Good luck!"
 else
