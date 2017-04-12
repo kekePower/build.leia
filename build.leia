@@ -65,7 +65,7 @@ else
     fi
 fi
 
-function ShowHelp () {}
+function ShowHelp () {
 	# Usage: ShowHelp ${0:t}
 	# When you change the order in the language file, you must also update
 	# the number range here.
