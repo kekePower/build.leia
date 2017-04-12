@@ -28,6 +28,8 @@ include common/numcpu
 include common/input_to_array
 
 # We load the configuration file
+# It has to be sourced after "colors" are added since it uses some of
+# those variables
 . ${0:a:h}/etc/${0:t}.conf
 
 # Function: LOGGER
@@ -375,6 +377,11 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
+	
+	if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
+		CLEAN_IS_SET=true
+		ADDONS=" (${L_38:u})"
+	fi
 
 	if ${ONLY_ADDONS} ; then
 		ADDON_IS_SET=true
