@@ -1,10 +1,12 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.3.6"
+SCRIPT_VERSION="1.3.7"
 
-if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
+# if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
+if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
     echo "Please edit the configuration file located at"
-    echo "${0:a:h}/etc/${0:t}.conf"
+    echo "${0:a:h}/etc/${0:t}.conf.sample"
+		echo "and rename it to ${0:t}.conf"
     echo "Script aborted."
     exit
 fi
@@ -49,7 +51,7 @@ elif [[ -f ${INCLUDEDIR}/${0:t}/language/${SysLang}.inc ]]; then
     include ${0:t}/language/${SysLang} ${0:t}
     NOLANG=${MyLANG}
 else
-    echo "\n${RED}Could not find a language file for your system language (${NOLANG}).${END}"
+    echo "\n${WARNING}Could not find a language file for your system language (${NOLANG}).${END}"
     echo "${WHITE}Would you like to continue with English (en_US)? (Y/n)${END} \c"
     read LangAnswer
     if [[ ( ${LangAnswer} == "" || ${LangAnswer} == "Y" || ${LangAnswer} == "y" ) ]]; then
@@ -63,8 +65,10 @@ else
     fi
 fi
 
-function ShowHelp () {
+function ShowHelp () {}
 	# Usage: ShowHelp ${0:t}
+	# When you change the order in the language file, you must also update
+	# the number range here.
     for i in {10..30}
     do
         help=Help_${i}
@@ -91,13 +95,14 @@ if [[ ${1} == "--help" ]]; then
 fi
 
 KODIVERSION=Leia
-
-# Edit this to install to another directory
-PREFIX="/opt/${KODIVERSION:l}"
-#
-
 KODI=${KODIDIR}/${KODIVERSION}
 ARROW="${W}-${END}${INFO}>${END}"
+
+if ${USE_SUDO} ; then
+	SUDO="sudo "
+else
+	SUDO=""
+fi
 
 MSG="Welcome to ${0:t} v${SCRIPT_VERSION}"
 echo "${WHITE}[$(date +%T)]${END} ${W}${MSG}${END}"
@@ -136,9 +141,9 @@ fi
 # We check to see if clean and dirty are set at the same time.
 # This is not wanted and the script will exit if found.
 if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
-	echo "${W}**${END} ${RED}${L_101}${END} ${W}**${END}"
-	echo "${W}**${END} ${RED}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
-	echo "${W}**${END} ${RED}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
+	echo "${W}**${END} ${WARNING}${L_101}${END} ${W}**${END}"
+	echo "${W}**${END} ${WARNING}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
+	echo "${W}**${END} ${WARNING}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
 	exit
 fi
 
@@ -197,17 +202,12 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
 		builtin cd ${KODI}/kodi-build
-		# git remote update >> ${LOGGYLOGFILE} 2>&1
-		# git status -uno >> /tmp/build.leia.gitpull 2>&1
 		if [[ $(git rev-parse HEAD) == $(git ls-remote $(git rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]]; then
 			UPTODATE=true
 		else
 			UPTODATE=false
 		fi
 		echo "##############################################################" >> ${LOGGYLOGFILE} 2>&1
-		# cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
-		# echo ${UPTODATE}
-		# if [[ $( grep "Your branch is up-to-date" /tmp/build.leia.gitpull ) ]]; then
 		if ${UPTODATE} ; then
 
 				# Removing the temp git pull file
@@ -364,7 +364,7 @@ function install_kodi () {
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
     builtin cd ${KODI}/kodi-build
-		sudo make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+		${SUDO}make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 		echo "#########################################################" >> ${LOGGYLOGFILE} > /dev/null 2>&1
 	elif ! ${ONLY_ADDONS} ; then
 		MSG="${L_110} ${KODIVERSION} ${L_111} ${L_25}"
@@ -395,7 +395,7 @@ function install_addons () {
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
 				builtin cd ${KODI}
-		    sudo make -s -C \
+		    ${SUDO}make -s -C \
 				tools/depends/target/binary-addons \
 				distclean \
 				> /dev/null 2>&1
@@ -404,18 +404,18 @@ function install_addons () {
 		    MSG="${L_92}${ADDONS}"
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
-		    sudo make -s -j${NUMCPU} -C \
+		    ${SUDO}make -s -j${NUMCPU} -C \
 		    tools/depends/target/binary-addons \
 		    PREFIX=${PREFIX} \
 		    >> ${LOGGYLOGFILE} 2>&1
 				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 )
 				if [[ ! ${NOTBUILT} == "" ]]; then
 					MSG="${L_94}:${NOTBUILT}"
-					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
+					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				fi
 		else
 			MSG="Could not find Kodi. Please run \"build.leia --help\" for more information."
-			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
+			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			loggy ${MSG}
 			exit
 		fi

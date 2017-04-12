@@ -1,8 +1,12 @@
 # Configuration for build.leia
 
-# You have to delete the next line to confirm that you've made the
-# neccessary changes to this file.
-REMOVEME
+# Edit this to install to another directory
+PREFIX="/opt/leia"
+
+# Set this variable to false if you don't want to install Kodi
+# globally. You will also have to edit the PREFIX in build.leia
+# to a directory your user has write access to.
+USE_SUDO=true
 
 # If you want to pull from a different source than the Kodi main
 # repository, you can set it here
@@ -15,7 +19,7 @@ LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)"
 
 # Language option.
 # Supports
-# * Norwegian (no_NB)
+# * Norwegian (no_NB) - Not up-to-date at the moment.
 # * English (en_US)
 #
 MyLANG=en_US
@@ -24,7 +28,7 @@ MyLANG=en_US
 # Uncomment if you want to use the system included java installation
 export JAVA_HOME=/opt/jdk
 
-# Set these paths to reflect your setup
+# Set this path to where you keep the Kodi source
 KODIDIR=${HOME}/kodi # This one is where you keep the Leia directory
 
 # See include/common/colors.inc for more options
