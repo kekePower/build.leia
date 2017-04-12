@@ -179,10 +179,6 @@ function fetch_kodi () {
 	fi
 }
 
-# echo "ONLY_ADDONS=${ONLY_ADDONS}"
-# echo "NOGIT_IS_SET=${NOGIT_IS_SET}"
-# exit
-
 # Function: GIT_PULL
 function git_pull () {
 if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
