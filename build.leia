@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.3.5"
+SCRIPT_VERSION="1.3.6"
 
 if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
     echo "Please edit the configuration file located at"
@@ -65,7 +65,7 @@ fi
 
 function ShowHelp () {
 	# Usage: ShowHelp ${0:t}
-    for i in {10..29}
+    for i in {10..30}
     do
         help=Help_${i}
         eval echo \$${help}
@@ -81,6 +81,8 @@ FORCE_IS_SET=false
 NOGIT_IS_SET=false
 NOCCACHE_IS_SET=false
 FRESH_INSTALL=false
+GITMSG=false
+ONLY_ADDONS=false
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
@@ -112,7 +114,7 @@ if [[ ! ${@} || ${@} == "" ]] ; then
 elif [[ ${@} =~ "--with" ]]; then
 
 	# Initialze the array in the function InputToArray before use
-	# Options are: --with=clean,dirty,addons,no-git,force
+	# Options are: --with=clean,dirty,addons,no-git,force,only-addons
 	InputToArray ${@}
 	for i in ${InputArray}
 	do
@@ -120,12 +122,13 @@ elif [[ ${@} =~ "--with" ]]; then
 	done
 
 	# We default to doing a clean install if not --with=clean is set and if --with=dirty is not set
-	if ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
-		# DIRTY_IS_SET=false
+	if (( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET})) && ! ${ONLY_ADDONS} ; then
 		MSG="${L_100} --with=clean"
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
 		include ${0:t}/clean
+	elif ${ONLY_ADDONS} ; then
+		NOGIT_IS_SET=true
 	fi
 
 fi
@@ -147,7 +150,7 @@ function fetch_kodi () {
 		
 		if [[ ${answer} == "" || ${answer} == "${L_82}" || ${answer} == "${L_83}" ]]; then
 			builtin cd ${KODIDIR} > /dev/null 2>&1
-			MSG=${L_112}
+			MSG="${L_112}"
 			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			git clone -b master ${SOURCE} ${KODIVERSION} >> ${LOGGYLOGFILE} 2>&1
@@ -161,21 +164,28 @@ function fetch_kodi () {
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
 				ADDON_IS_SET=true
 			else
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${L_106}${END}"
+				MSG="${L_106}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
 				ADDON_IS_SET=false
 			fi
 		else
-			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
+			MSG="${L_107}"
+			echo "\n ${ARROW} ${YELLOW}${MSG} ${KODI}${END}"
 			echo "${ARROW} ${YELLOW}git clone ${SOURCE} ${KODIVERSION}${END}"
-			echo "${ARROW} ${WARNING}${L_25}${END}"
+			MSG="${L_25}"
+			echo "${ARROW} ${WARNING}${MSG}${END}"
 			exit
 		fi
 	fi
 }
 
+# echo "ONLY_ADDONS=${ONLY_ADDONS}"
+# echo "NOGIT_IS_SET=${NOGIT_IS_SET}"
+# exit
+
 # Function: GIT_PULL
 function git_pull () {
-if ! ${FRESH_INSTALL} ; then
+if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 	
   if ${FORCE_IS_SET} ; then
 		FORCED="(${L_24})"
@@ -187,36 +197,40 @@ if ! ${FRESH_INSTALL} ; then
     
   if ! ${NOGIT_IS_SET} ; then
 
+		MSG="${L_20} ${KODIVERSION}${YesForce}"
+		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
 		builtin cd ${KODI}/kodi-build
-		git remote update >> ${LOGGYLOGFILE} 2>&1
-		git status -uno >> /tmp/build.leia.gitpull 2>&1
+		# git remote update >> ${LOGGYLOGFILE} 2>&1
+		# git status -uno >> /tmp/build.leia.gitpull 2>&1
+		if [[ $(git rev-parse HEAD) == $(git ls-remote $(git rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]]; then
+			UPTODATE=true
+		else
+			UPTODATE=false
+		fi
 		echo "##############################################################" >> ${LOGGYLOGFILE} 2>&1
-		cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
-
-		if [[ $( grep "Your branch is up-to-date" /tmp/build.leia.gitpull ) ]]; then
+		# cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
+		# echo ${UPTODATE}
+		# if [[ $( grep "Your branch is up-to-date" /tmp/build.leia.gitpull ) ]]; then
+		if ${UPTODATE} ; then
 
 				# Removing the temp git pull file
-				rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
+				# rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
 
-				MSG="${L_20} ${KODIVERSION}${YesForce}"
-				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+				MSG="${KODIVERSION} ${L_23} ${FORCED}"
+				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				loggy ${MSG}
-#				MSG="${KODIVERSION} ${L_23} ${FORCED}"
-#				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-#				loggy ${MSG}
-				if ${GITMSG} ; then
+				if ! ${GITMSG} ; then
 					exit
 				fi
 
 			else
 
-				MSG="${L_20} ${KODIVERSION}${YesForce}"
-				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-				loggy ${MSG}
 				MSG="${L_21} ${KODIVERSION} ${L_22}"
 				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
 			  git pull >> ${LOGGYLOGFILE} 2>&1
+				GITMSG=true
 
 			fi
 		fi
@@ -321,7 +335,7 @@ function configure_kodi () {
 function build_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
-if ! ${GITMSG} ; then
+if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 
     MSG="${L_30} ${KODIVERSION}"
     loggy ${MSG}
@@ -329,13 +343,13 @@ if ! ${GITMSG} ; then
     MSG="${L_33} ${KODIVERSION}. ${L_34}"
     echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
     loggy ${MSG}
+		builtin cd ${KODI}/kodi-build
     cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 
     if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
       MSG="${L_35} ${KODIVERSION} ${L_36}"
       echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
       loggy ${MSG}
-			# FAILED="${L_110} ${KODIVERSION} ${L_111}"
 			FAILED=true
 		else
 			FAILED=false
@@ -350,22 +364,38 @@ fi
 function install_kodi () {
 
   if ! ${FAILED} ; then
-        MSG="${L_90} ${PREFIX}"
-        echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-        loggy ${MSG}
-        builtin cd ${KODI}/kodi-build
-        sudo make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
-	loggy "#########################################################"
+		MSG="${L_90} ${PREFIX}"
+		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
+    builtin cd ${KODI}/kodi-build
+		sudo make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+		echo "#########################################################" >> ${LOGGYLOGFILE} > /dev/null 2>&1
+	elif ! ${ONLY_ADDONS} ; then
+		MSG="${L_110} ${KODIVERSION} ${L_111} ${L_25}"
+		echo "${WHITE}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
   fi
 
 }
 
 # Function: INSTALL_ADDONS
 function install_addons () {
+
+	if ${ONLY_ADDONS} ; then
+		ADDON_IS_SET=true
+		if [[ -f ${PREFIX}/bin/kodi ]]; then
+			FAILED=false
+		else
+			FAILED=true
+		fi
+		CLEAN_IS_SET=true
+		ADDONS=" ${L_95}"
+	fi
+
 	if ${ADDON_IS_SET} ; then
 		if ! ${FAILED} ; then
 			if ${CLEAN_IS_SET} ; then
-		    MSG="${L_91}"
+		    MSG="${L_91}${ADDONS}"
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
 				builtin cd ${KODI}
@@ -375,18 +405,23 @@ function install_addons () {
 				> /dev/null 2>&1
 			fi
 
-		    MSG="${L_92}"
+		    MSG="${L_92}${ADDONS}"
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
 		    sudo make -s -j${NUMCPU} -C \
 		    tools/depends/target/binary-addons \
 		    PREFIX=${PREFIX} \
 		    >> ${LOGGYLOGFILE} 2>&1
-				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | cut -d: -f2 )
+				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 )
 				if [[ ! ${NOTBUILT} == "" ]]; then
 					MSG="${L_94}:${NOTBUILT}"
 					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
 				fi
+		else
+			MSG="Could not find Kodi. Please run \"build.leia --help\" for more information."
+			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
+			loggy ${MSG}
+			exit
 		fi
 	elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
 		MSG="${L_93}"
