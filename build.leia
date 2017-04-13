@@ -100,7 +100,7 @@ KODI=${KODIDIR}/${KODIVERSION}
 ARROW="${W}-${END}${INFO}>${END}"
 
 if ${USE_SUDO} ; then
-	SUDO="sudo "
+	SUDO="$( which sudo )"
 else
 	SUDO=""
 fi
@@ -362,7 +362,7 @@ function install_kodi () {
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
     builtin cd ${KODI}/kodi-build
-		${SUDO}make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+		${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 		echo "#########################################################" >> ${LOGGYLOGFILE} > /dev/null 2>&1
 	elif ! ${ONLY_ADDONS} ; then
 		MSG="${L_110} ${KODIVERSION} ${L_111} ${L_25}"
@@ -398,7 +398,7 @@ function install_addons () {
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
 				builtin cd ${KODI}
-		    ${SUDO}make -s -C \
+		    ${SUDO} make -s -C \
 				tools/depends/target/binary-addons \
 				distclean \
 				> /dev/null 2>&1
@@ -407,7 +407,7 @@ function install_addons () {
 		    MSG="${L_92}${ADDONS}"
 		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		    loggy ${MSG}
-		    ${SUDO}make -s -j${NUMCPU} -C \
+		    ${SUDO} make -s -j${NUMCPU} -C \
 		    tools/depends/target/binary-addons \
 		    PREFIX=${PREFIX} \
 		    >> ${LOGGYLOGFILE} 2>&1
