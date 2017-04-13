@@ -246,6 +246,7 @@ if ! ${GITMSG} ; then
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
+		if ! ${CCACHE_IS_SET} ; then
 			if [[ $( which ccache ) ]]; then
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_119}${END}"
@@ -258,10 +259,10 @@ if ! ${GITMSG} ; then
 					ccache -C >> ${LOGGYLOGFILE} 2>&1
 				fi
 			fi
-#		elif ${DIRTY_IS_SET} ; then
-#			builtin cd ${KODI}/kodi-build
-		fi
+		fi # End of check for no-ccache check
+	fi # End of clean check
 	else
+	if ! ${CCACHE_IS_SET} ; then
 		if [[ $( which ccache ) ]]; then
 			MSG="${L_118}"
 			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
@@ -277,6 +278,7 @@ if ! ${GITMSG} ; then
 				ccache -C >> ${LOGGYLOGFILE} 2>&1
 			fi
 		fi
+	fi # End of no-ccache check
 	fi
 # End of the GITMSG check
 fi
