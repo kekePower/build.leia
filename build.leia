@@ -191,10 +191,10 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 	
   if ${FORCE_IS_SET} ; then
 		FORCED="(${L_24})"
-		GITMSG=true
+		GITMSG=false
 	else
 		FORCED="(${L_25})"
-		GITMSG=false
+		GITMSG=true
   fi
     
   if ! ${NOGIT_IS_SET} ; then
@@ -211,13 +211,10 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 		echo "##############################################################" >> ${LOGGYLOGFILE} 2>&1
 		if ${UPTODATE} ; then
 
-				# Removing the temp git pull file
-				# rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
-
 				MSG="${KODIVERSION} ${L_23} ${FORCED}"
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				loggy ${MSG}
-				if ! ${GITMSG} ; then
+				if ${GITMSG} ; then
 					exit
 				fi
 
@@ -227,7 +224,7 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
 			  git pull >> ${LOGGYLOGFILE} 2>&1
-				GITMSG=true
+				GITMSG=false
 
 			fi
 		fi
