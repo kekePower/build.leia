@@ -85,7 +85,7 @@ DIRTY_IS_SET=false
 FORCE_IS_SET=false
 NOGIT_IS_SET=false
 NOCCACHE_IS_SET=false
-BINARY_IS_SET=false
+# BINARY_IS_SET=false
 FRESH_INSTALL=false
 GITMSG=false
 ONLY_ADDONS=false
@@ -127,7 +127,7 @@ elif [[ ${@} =~ "--with" ]]; then
 	done
 
 	# We default to doing a clean install if these variables are false
-	if ( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ) && ! ${ONLY_ADDONS} && ! ${BINARY_IS_SET} ; then
+	if ( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 		MSG="${L_100} --with=clean"
 		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
@@ -435,34 +435,8 @@ function install_addons () {
 	fi
 }
 
-# Function BUILD_XZ
-function build_xz () {
-if [[ $( which xz ) ]]; then
-	if ${BINARY_IS_SET} ; then
-		if [[ ! -d ${KODIDIR}/binary ]]; then
-			MSG="Creating directory for xz file"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		  loggy ${MSG}
-			mkdir ${KODIDIR}/binary
-		fi
-		MSG="Compressing your installed Kodi installation. Please wait..."
-		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		loggy ${MSG}
-		GITVERSION=$(git --no-pager log --abbrev=7 -n 1 --pretty=format:"%h %ci" HEAD | awk '{gsub("-", "");print $2"_"$1}')
-		builtin cd ${KODIDIR}/binary
-		MSG="${KODIDIR}/binary/kodi-leia-v18alpha1-${GITVERSION}.tar.xz"
-		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		loggy ${MSG}
-		tar cf kodi-leia-v18alpha1-${GITVERSION}.tar ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
-		xz -9e -T${NUMCPU} -q kodi-leia-v18alpha1-${GITVERSION}.tar >> ${LOGGYLOGFILE} 2>&1
-	fi
-else
-	echo "xz not installed. Can't create file. ${L_25}"
-	exit
-}
-
 # Here we run all of our functions in turn
-if ! ${BINARY_IS_SET} ; then
+# if ! ${BINARY_IS_SET} ; then
 
 	fetch_kodi
 	git_pull
@@ -478,6 +452,6 @@ if ! ${BINARY_IS_SET} ; then
 	echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
 	echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
 
-else
-	build_xz
-fi
+# else
+#	build_xz
+# fi
