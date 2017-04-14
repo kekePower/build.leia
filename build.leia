@@ -85,7 +85,6 @@ DIRTY_IS_SET=false
 FORCE_IS_SET=false
 NOGIT_IS_SET=false
 NOCCACHE_IS_SET=false
-# BINARY_IS_SET=false
 FRESH_INSTALL=false
 GITMSG=false
 ONLY_ADDONS=false
@@ -436,22 +435,16 @@ function install_addons () {
 }
 
 # Here we run all of our functions in turn
-# if ! ${BINARY_IS_SET} ; then
+fetch_kodi
+git_pull
+clean_kodi
+configure_kodi
+build_kodi
+install_kodi
+install_addons
 
-	fetch_kodi
-	git_pull
-	clean_kodi
-	configure_kodi
-	build_kodi
-	install_kodi
-	install_addons
-
-	echo "###################################################################" >> ${LOGGYLOGFILE}
-	echo "#             End of compilation for ${KODIVERSION}                         #" >> ${LOGGYLOGFILE}
-	echo "###################################################################" >> ${LOGGYLOGFILE}
-	echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
-	echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
-
-# else
-#	build_xz
-# fi
+echo "###################################################################" >> ${LOGGYLOGFILE}
+echo "#             End of compilation for ${KODIVERSION}                         #" >> ${LOGGYLOGFILE}
+echo "###################################################################" >> ${LOGGYLOGFILE}
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
+echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
