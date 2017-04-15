@@ -12,13 +12,14 @@ else
 	fi
 fi
 
-SCRIPT_VERSION="1.3.11"
+SCRIPT_VERSION="1.3.12"
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
     echo "Please edit the configuration file located at"
     echo "${0:a:h}/etc/${0:t}.conf.sample"
 		echo "and rename it to ${0:t}.conf"
     echo "Script aborted."
+		rm -f /tmp/.${0:t}.pid
     exit
 fi
 
@@ -74,6 +75,7 @@ else
         echo "${WHITE}Please consider translating this script to your language.${END}"
         echo "${WHITE}The language files can be found at"
         echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
+				rm -f /tmp/.${0:t}.pid
         exit
     fi
 fi
@@ -87,6 +89,7 @@ function ShowHelp () {
         help=Help_${i}
         eval echo \$${help}
     done
+	rm -f /tmp/.${0:t}.pid
 	exit
 }
 
@@ -104,6 +107,7 @@ ONLY_ADDONS=false
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
+	rm -f /tmp/.${0:t}.pid
 	exit
 fi
 
@@ -155,6 +159,7 @@ if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 	echo "${W}**${END} ${WARNING}${L_101}${END} ${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
+	rm -f /tmp/.${0:t}.pid
 	exit
 fi
 
@@ -190,6 +195,7 @@ function fetch_kodi () {
 			echo "${ARROW} ${YELLOW}git clone ${SOURCE} ${KODIVERSION}${END}"
 			MSG="${L_25}"
 			echo "${ARROW} ${WARNING}${MSG}${END}"
+			rm -f /tmp/.${0:t}.pid
 			exit
 		fi
 	fi
@@ -225,6 +231,7 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				loggy ${MSG}
 				if ${GITMSG} ; then
+					rm -f /tmp/.${0:t}.pid
 					exit
 				fi
 
@@ -320,7 +327,8 @@ function configure_kodi () {
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
       builtin cd ${KODI}/kodi-build
-      ${CMAKE_FLAGS} cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${DISABLE_CCACHE} >> ${LOGGYLOGFILE} 2>&1
+      export ${CMAKE_FLAGS}
+			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${DISABLE_CCACHE} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
 			if ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
@@ -328,7 +336,8 @@ function configure_kodi () {
 				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
-				${CMAKE_FLAGS} cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${DISABLE_CCACHE} >> ${LOGGYLOGFILE} 2>&1
+				export ${CMAKE_FLAGS}
+				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${DISABLE_CCACHE} >> ${LOGGYLOGFILE} 2>&1
 			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
 				MSG="${L_30} ${KODIVERSION} ${L_39}"
 				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -383,6 +392,7 @@ function install_kodi () {
 		echo "${WHITE}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
 		if ${FAILED} ; then
+			rm -f /tmp/.${0:t}.pid
 			exit
 		fi
   fi
@@ -437,6 +447,7 @@ function install_addons () {
 			MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
 			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			loggy ${MSG}
+			rm -f /tmp/.${0:t}.pid
 			exit
 		fi
 	elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
