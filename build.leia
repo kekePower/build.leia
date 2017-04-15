@@ -12,7 +12,7 @@ else
 	fi
 fi
 
-SCRIPT_VERSION1"1.4.1"
+SCRIPT_VERSION="1.4.1"
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
     echo "Please edit the configuration file located at"
