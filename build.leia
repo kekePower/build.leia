@@ -12,7 +12,7 @@ else
 	fi
 fi
 
-SCRIPT_VERSION="1.4.0"
+SCRIPT_VERSION1"1.4.1"
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
     echo "Please edit the configuration file located at"
@@ -46,7 +46,7 @@ include common/input_to_array
 . ${0:a:h}/etc/${0:t}.conf
 
 # Include the theme file specified in configuration
-include themes/${THEME}
+include themes/${THEME:l}
 
 # Function: LOGGER
 # This has to be included after the config file as this contains the path to
@@ -92,7 +92,7 @@ function ShowHelp () {
         help=Help_${i}
         eval echo \$${help}
     done
-	rm -f /tmp/.${0:t}.pid
+	rm -f /tmp/.build.leia.pid
 	exit
 }
 
@@ -110,7 +110,7 @@ ONLY_ADDONS=false
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
-	rm -f /tmp/.${0:t}.pid
+	rm -f /tmp/.build.leia.pid
 	exit
 fi
 
@@ -162,7 +162,7 @@ if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 	echo "${W}**${END} ${WARNING}${L_101}${END} ${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
-	rm -f /tmp/.${0:t}.pid
+	rm -f /tmp/.build.leia.pid
 	exit
 fi
 
@@ -198,7 +198,7 @@ function fetch_kodi () {
 			echo "${ARROW} ${Y}git clone ${SOURCE} ${KODIVERSION}${END}"
 			MSG="${L_25}"
 			echo "${ARROW} ${WARNING}${MSG}${END}"
-			rm -f /tmp/.${0:t}.pid
+			rm -f /tmp/.build.leia.pid
 			exit
 		fi
 	fi
@@ -234,7 +234,7 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 				echo "${W}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				loggy ${MSG}
 				if ${GITMSG} ; then
-					rm -f /tmp/.${0:t}.pid
+					rm -f /tmp/.build.leia.pid
 					exit
 				fi
 
@@ -395,7 +395,7 @@ function install_kodi () {
 		echo "${W}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
 		if ${FAILED} ; then
-			rm -f /tmp/.${0:t}.pid
+			rm -f /tmp/.build.leia.pid
 			exit
 		fi
   fi
@@ -450,7 +450,7 @@ function install_addons () {
 			MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
 			echo "${W}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			loggy ${MSG}
-			rm -f /tmp/.${0:t}.pid
+			rm -f /tmp/.build.leia.pid
 			exit
 		fi
 	elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
