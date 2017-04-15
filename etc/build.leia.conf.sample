@@ -1,5 +1,10 @@
-# v2
+# v3
 # Configuration for build.leia
+
+# Set your color theme
+# Your options are
+# original, crazy, inverted, white, black
+THEME=original
 
 # Edit this to install to another directory
 PREFIX="/opt/leia"
@@ -35,8 +40,3 @@ export JAVA_HOME=/opt/jdk
 
 # Set this path to where you keep the Kodi source
 KODIDIR=${HOME}/kodi # This one is where you keep the Leia directory
-
-# See include/common/colors.inc for more options
-INFO=${LIGHTGREEN} # Light Green
-WARNING=${RED} # Red
-W=${WHITE} # Bold White, used for markers in Error messages
