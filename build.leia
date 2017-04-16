@@ -72,14 +72,14 @@ else
     echo "${W}Would you like to continue with English (en_US)? (Y/n)${END} \c"
     read LangAnswer
     if [[ ( ${LangAnswer} == "" || ${LangAnswer} == "Y" || ${LangAnswer} == "y" ) ]]; then
-        include ${0:t}/language/en_US ${0:t}
+			include ${0:t}/language/en_US ${0:t}
     else
-        echo "\n${Y}You decided not to continue. Sorry about that!${END}"
-        echo "${W}Please consider translating this script to your language.${END}"
-        echo "${W}The language files can be found at"
-        echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
-				rm -f /tmp/.${0:t}.pid
-        exit
+      echo "\n${Y}You decided not to continue. Sorry about that!${END}"
+      echo "${W}Please consider translating this script to your language.${END}"
+      echo "${W}The language files can be found at"
+      echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
+			rm -f /tmp/.${0:t}.pid
+      exit
     fi
 fi
 
@@ -87,11 +87,13 @@ function ShowHelp () {
 	# Usage: ShowHelp ${0:t}
 	# When you change the order in the language file, you must also update
 	# the number range here.
-    for i in {10..30}
-    do
-        help=Help_${i}
-        eval echo \$${help}
-    done
+
+	for i in {10..30}
+		do
+		help=Help_${i}
+		eval echo \$${help}
+	done
+
 	rm -f /tmp/.build.leia.pid
 	exit
 }
@@ -258,7 +260,7 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 				MSG="${L_21} ${KODIVERSION} ${L_22}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
-			  git pull >> ${LOGGYLOGFILE} 2>&1
+				git pull >> ${LOGGYLOGFILE} 2>&1
 				GITMSG=false
 
 			fi
@@ -348,8 +350,8 @@ function configure_kodi () {
 			loggy ${MSG}
 			builtin cd ${KODI}
 			mkdir kodi-build > /dev/null 2>&1
-      builtin cd ${KODI}/kodi-build
-      export ${CMAKE_FLAGS}
+			builtin cd ${KODI}/kodi-build
+			export ${CMAKE_FLAGS}
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${DISABLE_CCACHE} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
@@ -381,7 +383,7 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 		
     MSG="${L_33} ${KODIVERSION}. ${L_34}"
     echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-    loggy ${MSG}
+		loggy ${MSG}
 		builtin cd ${KODI}/kodi-build
     cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 
@@ -392,7 +394,7 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 			FAILED=true
 		else
 			FAILED=false
-    fi
+		fi
 
 # End of the GITMSG check
 fi
@@ -406,7 +408,7 @@ function install_kodi () {
 		MSG="${L_90} ${PREFIX}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-    builtin cd ${KODI}/kodi-build
+		builtin cd ${KODI}/kodi-build
 		${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 		echo "#########################################################" >> ${LOGGYLOGFILE} > /dev/null 2>&1
 	elif ${FAILED} && ! ${ONLY_ADDONS} ; then
@@ -417,7 +419,7 @@ function install_kodi () {
 			rm -f /tmp/.build.leia.pid
 			exit
 		fi
-  fi
+	fi
 
 }
 
@@ -443,11 +445,11 @@ function install_addons () {
 	if ${ADDON_IS_SET} ; then
 		if ! ${FAILED} ; then
 			if ${CLEAN_IS_SET} ; then
-		    MSG="${L_91}${ADDONS}"
-		    echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		    loggy ${MSG}
+				MSG="${L_91}${ADDONS}"
+				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+				loggy ${MSG}
 				builtin cd ${KODI}
-		    ${SUDO} make -s -C \
+				${SUDO} make -s -C \
 				tools/depends/target/binary-addons \
 				distclean \
 				> /dev/null 2>&1
