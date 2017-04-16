@@ -8,8 +8,8 @@ Within this script, you can write anything you want it to do. Be it to compile K
 
 What you have to add at the end, always, is
 
-**rm -f /tmp/.build.leia.pid**
-**exit**
+**`rm -f /tmp/.build.leia.pid`**
+**`exit`**
 
 The first line deletes the pid file created at the beginning of the script and this has to be done before exiting.
 
