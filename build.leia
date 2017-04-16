@@ -89,7 +89,7 @@ function ShowHelp () {
 	# the number range here.
 
 	for i in {10..30}
-		do
+	do
 		help=Help_${i}
 		eval echo \$${help}
 	done
@@ -142,7 +142,7 @@ elif [[ ${@} =~ "--with" ]]; then
 	InputToArray ${@}
 	for i in ${InputArray}
 	do
-    include ${0:t}/${i}
+		include ${0:t}/${i}
 	done
 
 	# We default to doing a clean install if these variables are false
@@ -247,26 +247,26 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 		echo "##############################################################" >> ${LOGGYLOGFILE} 2>&1
 		if ${UPTODATE} ; then
 
-				MSG="${KODIVERSION} ${L_23} ${FORCED}"
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-				loggy ${MSG}
-				if ${GITMSG} ; then
-					rm -f /tmp/.build.leia.pid
-					exit
-				fi
-
-			else
-
-				MSG="${L_21} ${KODIVERSION} ${L_22}"
-				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-				loggy ${MSG}
-				git pull >> ${LOGGYLOGFILE} 2>&1
-				GITMSG=false
-
+			MSG="${KODIVERSION} ${L_23} ${FORCED}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+			loggy ${MSG}
+			if ${GITMSG} ; then
+				rm -f /tmp/.build.leia.pid
+				exit
 			fi
+
 		else
+
+			MSG="${L_21} ${KODIVERSION} ${L_22}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			loggy ${MSG}
+			git pull >> ${LOGGYLOGFILE} 2>&1
 			GITMSG=false
+
 		fi
+	else
+		GITMSG=false
+	fi
 
 fi
 }
@@ -310,7 +310,7 @@ if ! ${GITMSG} ; then
 			MSG="${L_118}"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 			MSG="${L_119}"
-      echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 			MSG="${L_117} ${L_81}}"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END} \c"
 			read emptyccache
@@ -378,23 +378,23 @@ function build_kodi () {
 # We check if we have a message from git_pull. If not, we continue the build
 if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 
-    MSG="${L_30} ${KODIVERSION}"
-    loggy ${MSG}
+	MSG="${L_30} ${KODIVERSION}"
+	loggy ${MSG}
 		
-    MSG="${L_33} ${KODIVERSION}. ${L_34}"
-    echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		loggy ${MSG}
-		builtin cd ${KODI}/kodi-build
-    cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+	MSG="${L_33} ${KODIVERSION}. ${L_34}"
+	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
+	builtin cd ${KODI}/kodi-build
+	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
 
-    if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
-      MSG="${L_35} ${KODIVERSION} ${L_36}"
-      echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-      loggy ${MSG}
-			FAILED=true
-		else
-			FAILED=false
-		fi
+	if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
+		MSG="${L_35} ${KODIVERSION} ${L_36}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
+		FAILED=true
+	else
+		FAILED=false
+	fi
 
 # End of the GITMSG check
 fi
@@ -426,59 +426,59 @@ function install_kodi () {
 # Function: INSTALL_ADDONS
 function install_addons () {
 	
-	if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
-		CLEAN_IS_SET=true
-		ADDONS=" (${L_38:u})"
+if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
+	CLEAN_IS_SET=true
+	ADDONS=" (${L_38:u})"
+fi
+
+if ${ONLY_ADDONS} ; then
+	ADDON_IS_SET=true
+	if [[ -f ${PREFIX}/bin/kodi ]]; then
+		FAILED=false
+	else
+		FAILED=true
 	fi
+	CLEAN_IS_SET=true
+	ADDONS=" ${L_95}"
+fi
 
-	if ${ONLY_ADDONS} ; then
-		ADDON_IS_SET=true
-		if [[ -f ${PREFIX}/bin/kodi ]]; then
-			FAILED=false
-		else
-			FAILED=true
-		fi
-		CLEAN_IS_SET=true
-		ADDONS=" ${L_95}"
-	fi
-
-	if ${ADDON_IS_SET} ; then
-		if ! ${FAILED} ; then
-			if ${CLEAN_IS_SET} ; then
-				MSG="${L_91}${ADDONS}"
-				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-				loggy ${MSG}
-				builtin cd ${KODI}
-				${SUDO} make -s -C \
-				tools/depends/target/binary-addons \
-				distclean \
-				> /dev/null 2>&1
-			fi
-
-		    MSG="${L_92}${ADDONS}"
-		    echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		    loggy ${MSG}
-		    ${SUDO} make -s -j${NUMCPU} -C \
-		    tools/depends/target/binary-addons \
-		    PREFIX=${PREFIX} \
-		    >> ${LOGGYLOGFILE} 2>&1
-				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 )
-				if [[ ! ${NOTBUILT} == "" ]]; then
-					MSG="${L_94}:${NOTBUILT}"
-					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-				fi
-		else
-			MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
-			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+if ${ADDON_IS_SET} ; then
+	if ! ${FAILED} ; then
+		if ${CLEAN_IS_SET} ; then
+			MSG="${L_91}${ADDONS}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			rm -f /tmp/.build.leia.pid
-			exit
+			builtin cd ${KODI}
+			${SUDO} make -s -C \
+			tools/depends/target/binary-addons \
+			distclean \
+			> /dev/null 2>&1
 		fi
-	elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
-		MSG="${L_93}"
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+
+		MSG="${L_92}${ADDONS}"
+		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
+		${SUDO} make -s -j${NUMCPU} -C \
+		tools/depends/target/binary-addons \
+		PREFIX=${PREFIX} \
+		>> ${LOGGYLOGFILE} 2>&1
+		NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 )
+		if [[ ! ${NOTBUILT} == "" ]]; then
+			MSG="${L_94}:${NOTBUILT}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		fi
+	else
+		MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
+		rm -f /tmp/.build.leia.pid
+		exit
 	fi
+elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
+	MSG="${L_93}"
+	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+	loggy ${MSG}
+fi
 }
 
 # Here we run all of our functions in turn
