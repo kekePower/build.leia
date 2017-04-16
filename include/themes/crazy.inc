@@ -5,3 +5,4 @@ W=${ORANGE} # Used for markers in Error messages
 OTHER=${LIGHTBLUE} # For other messages
 Y=${LIGHTPURPLE} # Questions and other things
 TIME=${WHITE} # Color for the timestamp
+ARROW="${W}-${END}${INFO}>${END}"
