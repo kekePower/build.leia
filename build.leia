@@ -15,12 +15,12 @@ else
 fi
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
-    echo "Please edit the configuration file located at"
-    echo "${0:a:h}/etc/${0:t}.conf.sample"
-		echo "and rename it to ${0:t}.conf"
-    echo "Script aborted."
-		rm -f /tmp/.${0:t}.pid
-    exit
+	echo "Please edit the configuration file located at"
+	echo "${0:a:h}/etc/${0:t}.conf.sample"
+	echo "and rename it to ${0:t}.conf"
+	echo "Script aborted."
+	rm -f /tmp/.${0:t}.pid
+	exit
 fi
 
 # This function is used to include common sets of files used
