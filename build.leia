@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.4.2"
+SCRIPT_VERSION="1.4.3"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -116,7 +116,6 @@ fi
 
 KODIVERSION=Leia
 KODI=${KODIDIR}/${KODIVERSION}
-ARROW="${W}-${END}${INFO}>${END}"
 
 if ${USE_SUDO} ; then
 	SUDO=$( which sudo )
