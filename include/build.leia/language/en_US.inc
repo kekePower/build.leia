@@ -51,6 +51,7 @@
 	L_94="Addons failed to build"
 	L_95="(Only)"
 	L_96="Could not find Kodi."
+	L_97="Do you want to remove ${PREFIX} before installing?"
 	
 	L_100="Setting defaults to include"
 	L_101="You can't do a clean and dirty compilation at the same time."
@@ -65,7 +66,7 @@
 	L_110="The nightly build of"
 	L_111="failed."
 	L_112="Cloning the Leia source from Github. Please wait..."
-	L_113="Cleaning up old kodi-build"
+	L_113="Cleaning up kodi-build"
 	L_114="Having ccache installed will make compiling faster"
 	L_115="if you compile Leia often."
 	L_116="Cleaning up the ccache archive (ccache -C)"

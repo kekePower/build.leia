@@ -51,6 +51,7 @@
 	L_94="Tilleggsmoduler som feilet"
 	L_95="(Bare)"
 	L_96="Kunne ikke finne Kodi."
+	L_97="Ønsker du å slette ${PREFIX} før installasjon?"
 
 	L_100="Setter standarden til å inkludere"
 	L_101="Du kan ikke bruke ren (clean) og skitten (dirty) samtidig."
@@ -65,7 +66,7 @@
 	L_110="Nattlig bygging av"
 	L_111="feilet."
 	L_112="Henter kilden til Leia fra Github. Vennligst vent..."
-	L_113="Renser opp i gammel kodi-build"
+	L_113="Renser opp i kodi-build"
 	L_114="Å ha ccache installert vil gjøre kompileringen raskere"
 	L_115="hvis du kompilerer ofte."
 	L_116="Renser opp i ccache arkivet (ccache -C)"

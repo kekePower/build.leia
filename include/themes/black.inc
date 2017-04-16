@@ -1,6 +1,7 @@
 # See include/common/colors.inc for more options
-INFO=${BLACK} # Light Green
-WARNING=${BLACK} # Red
-W=${BLACK} # Bold White, used for markers in Error messages
-OTHER=${BLACK} # Purple for other messages
+INFO=${BLACK} # General information
+WARNING=${BLACK} # Warning messages
+W=${BLACK} # Used for markers in Error messages
+OTHER=${BLACK} # For other messages
 Y=${BLACK} # Questions and other things
+TIME=${BLACK} # Color for the timestamp
