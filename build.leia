@@ -323,8 +323,7 @@ if ! ${GITMSG} ; then
 		fi
 	fi # End of no-ccache check
 	fi
-# End of the GITMSG check
-fi
+fi # End of the GITMSG check
 
 }
 
@@ -332,7 +331,7 @@ fi
 function configure_kodi () {
 	
 	if ${NOCCACHE_IS_SET} ; then
-		DISABLE_CCACHE="-DENABLE_CCACHE:BOOL=OFF"
+		EXTRA_OPTIONS="-DENABLE_CCACHE:BOOL=OFF"
 	fi
 	
 	if [[ ! $( which ccache ) ]]; then
@@ -352,7 +351,7 @@ function configure_kodi () {
 			mkdir kodi-build > /dev/null 2>&1
 			builtin cd ${KODI}/kodi-build
 			export ${CMAKE_FLAGS}
-			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${DISABLE_CCACHE} >> ${LOGGYLOGFILE} 2>&1
+			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
 			if ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
