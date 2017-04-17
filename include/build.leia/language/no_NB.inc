@@ -21,7 +21,9 @@
   Help_28="\t${W}\$${END} ${2} --with=dirty"
   Help_29="\n${YELLOW}Skriptet av Stig-Ørjan Smelror <smelror@gmail.com>${END}"
 	Help_30="${YELLOW}Kilden kan hentes fra https://github.com/kekePower/build.leia${END}"
-    
+
+	L_10="Velkommen til"
+
   L_20="Forbereder daglig versjon av"
 	L_21="Oppdaterer"
   L_22="fra git"
