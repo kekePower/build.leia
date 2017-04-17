@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.4.3"
+SCRIPT_VERSION="1.4.4"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -285,10 +285,7 @@ if ! ${GITMSG} ; then
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
-			
-			# Ask if user wants to remove ${PREFIX} before installing
-			remove_kodi
-			
+	
 		if ! ${CCACHE_IS_SET} ; then
 			if [[ $( which ccache ) ]]; then
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
@@ -303,6 +300,10 @@ if ! ${GITMSG} ; then
 				fi
 			fi
 		fi # End of check for no-ccache check
+
+		# Ask if user wants to remove ${PREFIX} before installing
+		remove_kodi
+
 	fi # End of clean check
 	else
 	if ! ${CCACHE_IS_SET} ; then
