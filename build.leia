@@ -301,8 +301,8 @@ if ! ${GITMSG} ; then
 			fi
 		fi # End of check for no-ccache check
 
-		# Ask if user wants to remove ${PREFIX} before installing
-		remove_kodi
+	# Ask if user wants to remove ${PREFIX} before installing
+	remove_kodi
 
 	fi # End of clean check
 	else
