@@ -41,4 +41,21 @@ Colors defined are
 * TIME
 * ARROW
 
+## Logging
+
+I've written a simple logger function called **loggy**. All it does is echo the text to the pre-defined log.
+
+The format is:
+
+`loggy ${MSG}`
+
+In the main script, I also log the output of almost every command.
+
+`make -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1`
+
+Doing this enables me to check the log file if something happens and I can then correct the error and try again.
+
+`${NUMCPU}` checks the system for the number of cores and/or threads available and uses that number to compile. Use it to speed up compilation.
+
+
 That's all for now.
