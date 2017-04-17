@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SCRIPT_VERSION="1.4.5"
+SCRIPT_VERSION="1.4.6"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -170,7 +170,7 @@ fi
 # Funtion: REMOVE_KODI
 function remove_kodi () {
 
-	MSG="${L_97} ${L_81} \c"
+	MSG="${L_97} ${L_81}${END}${W} \c"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 	loggy ${MSG}
 	read removekodi
@@ -186,7 +186,8 @@ function remove_kodi () {
 # Function: FETCH_KODI
 function fetch_kodi () {
 	if [[ ! -d ${KODI} ]]; then
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_104} ${L_81}${END} \c"
+		MSG="${L_104} ${L_81}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG} \c${END}"
 		read answer
 		
 		if [[ ${answer} == "" || ${answer} == "${L_82}" || ${answer} == "${L_83}" ]]; then
@@ -199,7 +200,8 @@ function fetch_kodi () {
 			# We need to set a variable here so that we know it's a fresh copy
 			FRESH_INSTALL=true
 			
-			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_105} ${L_81}${END} \c"
+			MSG="${L_105} ${L_81}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG} \c${END}"
 			read binaryaddons
 			
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
@@ -290,7 +292,7 @@ if ! ${GITMSG} ; then
 			if [[ $( which ccache ) ]]; then
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_119}${END}"
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81}${END} \c"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81}${W} \c${END}"
 				read emptyccache
 				if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
 					MSG="${L_116}"
@@ -313,7 +315,7 @@ if ! ${GITMSG} ; then
 			MSG="${L_119}"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 			MSG="${L_117} ${L_81}}"
-			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END} \c"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${W} \c${END}"
 			read emptyccache
 			if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
 				MSG="${L_116}"
@@ -495,7 +497,9 @@ install_addons
 echo "###################################################################" >> ${LOGGYLOGFILE}
 echo "#             End of compilation for ${KODIVERSION}                         #" >> ${LOGGYLOGFILE}
 echo "###################################################################" >> ${LOGGYLOGFILE}
-echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}: ${PREFIX}/bin/kodi${END}"
-echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}: ${LOGGYLOGFILE}${END}"
+echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}:{END}"
+echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi$${END}"
+echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}:${END}"
+echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${LOGGYLOGFILE}${END}"
 
 rm -f /tmp/.${0:t}.pid
