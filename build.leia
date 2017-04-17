@@ -464,8 +464,10 @@ if ${ADDON_IS_SET} ; then
 		>> ${LOGGYLOGFILE} 2>&1
 		NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 )
 		if [[ ! ${NOTBUILT} == "" ]]; then
-			MSG="${L_94}:${NOTBUILT}"
+			MSG="${L_94}:"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+			MSG="${NOTBUILT}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW}${WARNING}${MSG}${END}"
 		fi
 	else
 		MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
