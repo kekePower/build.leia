@@ -104,10 +104,10 @@ CLEAN_IS_SET=false
 DIRTY_IS_SET=false
 FORCE_IS_SET=false
 NOGIT_IS_SET=false
-NOCCACHE_IS_SET=false
 FRESH_INSTALL=false
-GITMSG=false
 ONLY_ADDONS=false
+NOCCACHE_IS_SET=false
+GITMSG=false
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
@@ -286,7 +286,7 @@ if ! ${GITMSG} ; then
 			rm -rf kodi-build > /dev/null 2>&1
 			mkdir kodi-build > /dev/null 2>&1
 	
-		if ! ${CCACHE_IS_SET} ; then
+		if ! ${NOCCACHE_IS_SET} ; then
 			if [[ $( which ccache ) ]]; then
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_119}${END}"
