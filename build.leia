@@ -498,7 +498,7 @@ echo "###################################################################" >> ${
 echo "#             End of compilation for ${KODIVERSION}                         #" >> ${LOGGYLOGFILE}
 echo "###################################################################" >> ${LOGGYLOGFILE}
 echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}:{END}"
-echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi$${END}"
+echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi${END}"
 echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}:${END}"
 echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${LOGGYLOGFILE}${END}"
 
