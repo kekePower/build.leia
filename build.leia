@@ -176,9 +176,9 @@ if [[ -d ${PREFIX} ]]; then
 
 	MSG="${L_98}"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+	loggy ${MSG}
 	MSG="${L_97} ${L_81}${END}${Y} \c${END}"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
-	loggy ${MSG}
 	read removekodi
 	
 	if [[ ${removekodi} == "" || ${removekodi} == "${L_82}" || ${removekodi} == "${L_83}" ]]; then
