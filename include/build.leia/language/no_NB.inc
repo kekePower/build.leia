@@ -77,5 +77,5 @@ L_117="Ønsker du å rense ccache arkivet totalt?"
 L_118="Å rense ccache arkivet vil gjøre at byggingen vil ta vesentlig legre tid."
 L_119="Det vil også gjøre sitt til at Kodi blir bygget med de siste bibliotekene du har installert."
 
-L_120="Det gikk veldig bra. Du kan kjøre Kodi med denne kommandoen"
+L_120="Det gikk veldig bra. Du kan starte Kodi med denne kommandoen"
 L_121="Du kan se hele loggen i denne filen"
