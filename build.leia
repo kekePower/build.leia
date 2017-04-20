@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.4.6"
+SCRIPT_VERSION="1.4.7"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -169,8 +169,12 @@ fi
 
 # Funtion: REMOVE_KODI
 function remove_kodi () {
+	
+if [[ -d ${PREFIX} ]]; then
 
-	MSG="${L_97} ${L_81}${END}${W} \c"
+	MSG="${L_98}"
+	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+	MSG="${L_97} ${L_81}${END}${Y} \c"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 	loggy ${MSG}
 	read removekodi
@@ -182,6 +186,8 @@ function remove_kodi () {
 		${SUDO} rm -rf ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 	fi
 
+fi
+
 }
 # Function: FETCH_KODI
 function fetch_kodi () {
@@ -192,7 +198,7 @@ function fetch_kodi () {
 		
 		if [[ ${answer} == "" || ${answer} == "${L_82}" || ${answer} == "${L_83}" ]]; then
 			builtin cd ${KODIDIR} > /dev/null 2>&1
-			MSG="${L_112}"
+			MSG="${L_112} ${L_34}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			git clone -b master ${SOURCE} ${KODIVERSION} >> ${LOGGYLOGFILE} 2>&1
@@ -206,10 +212,12 @@ function fetch_kodi () {
 			
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
 				ADDON_IS_SET=true
+				FRESH_INSTALL=true
 			else
 				MSG="${L_106}"
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 				ADDON_IS_SET=false
+				FRESH_INSTALL=true
 			fi
 		else
 			MSG="${L_107}"
@@ -225,7 +233,8 @@ function fetch_kodi () {
 
 # Function: GIT_PULL
 function git_pull () {
-if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
+if ! ${FRESH_INSTALL} ; then
+if ! ${ONLY_ADDONS} ; then
 	
   if ${FORCE_IS_SET} ; then
 		FORCED="(${L_24})"
@@ -271,6 +280,7 @@ if ( ! ${FRESH_INSTALL} || ! ${ONLY_ADDONS} ) ; then
 	fi
 
 fi
+fi
 }
 
 # Function: CLEAN_KODI
@@ -286,7 +296,6 @@ if ! ${GITMSG} ; then
 			loggy ${MSG}
 			builtin cd ${KODI}
 			rm -rf kodi-build > /dev/null 2>&1
-			mkdir kodi-build > /dev/null 2>&1
 	
 		if ! ${NOCCACHE_IS_SET} ; then
 			if [[ $( which ccache ) ]]; then
@@ -304,7 +313,7 @@ if ! ${GITMSG} ; then
 		fi # End of check for no-ccache check
 
 	# Ask if user wants to remove ${PREFIX} before installing
-	remove_kodi
+	# remove_kodi
 
 	fi # End of clean check
 	else
@@ -357,6 +366,9 @@ function configure_kodi () {
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
+			if [[ ! -d ${KODI}/kodi-build ]]; then
+				mkdir kodi-build > /dev/null 2>&1
+			fi
 			if ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
 				MSG="${L_31} ${KODIVERSION} ${L_38}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -427,7 +439,9 @@ function install_kodi () {
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-	
+
+if ! ${FRESH_INSTALL} ; then
+
 if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
 	CLEAN_IS_SET=true
 	ADDONS=" (${L_38:u})"
@@ -483,12 +497,15 @@ elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 	loggy ${MSG}
 fi
+
+fi
 }
 
 # Here we run all of our functions in turn
 fetch_kodi
 git_pull
 clean_kodi
+remove_kodi
 configure_kodi
 build_kodi
 install_kodi
@@ -497,7 +514,7 @@ install_addons
 echo "###################################################################" >> ${LOGGYLOGFILE}
 echo "#             End of compilation for ${KODIVERSION}                         #" >> ${LOGGYLOGFILE}
 echo "###################################################################" >> ${LOGGYLOGFILE}
-echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}:{END}"
+echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}:${END}"
 echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi${END}"
 echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}:${END}"
 echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${LOGGYLOGFILE}${END}"
