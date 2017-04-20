@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.4.7"
+SCRIPT_VERSION="1.4.8"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -169,12 +169,14 @@ fi
 
 # Funtion: REMOVE_KODI
 function remove_kodi () {
-	
+
+if ! ${ONLY_ADDONS} ; then
+
 if [[ -d ${PREFIX} ]]; then
 
 	MSG="${L_98}"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
-	MSG="${L_97} ${L_81}${END}${Y} \c"
+	MSG="${L_97} ${L_81}${END}${Y} \c${END}"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 	loggy ${MSG}
 	read removekodi
@@ -188,6 +190,7 @@ if [[ -d ${PREFIX} ]]; then
 
 fi
 
+fi
 }
 # Function: FETCH_KODI
 function fetch_kodi () {
