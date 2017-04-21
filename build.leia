@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.4.8"
+SCRIPT_VERSION="1.4.9"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -177,7 +177,7 @@ if [[ -d ${PREFIX} ]]; then
 	MSG="${L_98}"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 	loggy ${MSG}
-	MSG="${L_97} ${L_81}${END}${Y} \c${END}"
+	MSG="${L_97} ${L_81}${END}${Y} \c"
 	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
 	read removekodi
 	
@@ -481,12 +481,15 @@ if ${ADDON_IS_SET} ; then
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
-		NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 )
+		NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
 		if [[ ! ${NOTBUILT} == "" ]]; then
 			MSG="${L_94}:"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-			MSG="${NOTBUILT}"
-			echo "${TIME}[$(date +%T)]${END} ${ARROW}${WARNING}${MSG}${END}"
+			for i in ${NOTBUILT}
+			do
+				MSG="${i}"
+				echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${ARROW} ${WARNING}${MSG}${END}"
+			done
 		fi
 	else
 		MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"

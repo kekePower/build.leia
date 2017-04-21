@@ -46,11 +46,11 @@ L_81="(J/n)" # Yes or no
 L_82="J" # Yes
 L_83="j" # yes
 
-L_90="Installerer Kodi lokalt til"
+L_90="Installerer Kodi til"
 L_91="Rydder opp i binære tillegg"
 L_92="Kompilerer og installerer binære tillegg"
 L_93="Du har valgt å ikke installere de binære tilleggsmodulere denne gangen."
-L_94="Tilleggsmoduler som feilet"
+L_94="Tilleggsmoduler som ikke ble bygget"
 L_95="(Bare)"
 L_96="Kunne ikke finne Kodi."
 L_97="Ønsker du å slette ${PREFIX} før installasjon?"

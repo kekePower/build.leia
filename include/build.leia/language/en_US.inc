@@ -46,11 +46,11 @@ L_81="(Y/n)" # Yes or no
 L_82="Y" # Yes
 L_83="y" # yes
     
-L_90="Installing Kodi locally to"
+L_90="Installing Kodi to"
 L_91="Cleaning up binary-addons"
 L_92="Compiling and installing binary-addons"
 L_93="You have chosen not to install the binary-addons at this time."
-L_94="Addons failed to build"
+L_94="Addons that failed to build"
 L_95="(Only)"
 L_96="Could not find Kodi."
 L_97="Do you want to remove ${PREFIX} before installing?"
