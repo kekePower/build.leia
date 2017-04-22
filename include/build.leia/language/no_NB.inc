@@ -55,6 +55,7 @@ L_95="(Bare)"
 L_96="Kunne ikke finne Kodi."
 L_97="Ønsker du å slette ${PREFIX} før installasjon?"
 L_98="Fant en gammel installasjon av Kodi i ${PREFIX}."
+L_99="Progresjon:"
 
 L_100="Setter standarden til å inkludere"
 L_101="Du kan ikke bruke ren (clean) og skitten (dirty) samtidig."

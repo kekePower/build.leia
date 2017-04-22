@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.4.9"
+SCRIPT_VERSION="1.5.0"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -298,7 +298,7 @@ if ! ${GITMSG} ; then
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
-			rm -rf kodi-build > /dev/null 2>&1
+			${SUDO} rm -rf kodi-build > /dev/null 2>&1
 	
 		if ! ${NOCCACHE_IS_SET} ; then
 			if [[ $( which ccache ) ]]; then
@@ -314,9 +314,6 @@ if ! ${GITMSG} ; then
 				fi
 			fi
 		fi # End of check for no-ccache check
-
-	# Ask if user wants to remove ${PREFIX} before installing
-	# remove_kodi
 
 	fi # End of clean check
 	else
@@ -402,8 +399,15 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 	builtin cd ${KODI}/kodi-build
-	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
+	while pidof cmake > /dev/null 2>&1
+	do
+			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g')
+			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSG}${END}"\\r
+	done
 
+	# Why do I use a variable (FAILED) when I can just exit right here...?
+	# Please fix!
 	if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
 		MSG="${L_35} ${KODIVERSION} ${L_36}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
@@ -477,7 +481,7 @@ if ${ADDON_IS_SET} ; then
 		MSG="${L_92}${ADDONS}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		${SUDO} make -s -j${NUMCPU} -C \
+		${SUDO} make +s +j${NUMCPU} -C \
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
