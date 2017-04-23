@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.0"
+SCRIPT_VERSION="1.5.1"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -402,7 +402,7 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
 	while pidof cmake > /dev/null 2>&1
 	do
-			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g')
+			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' )
 			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSG}${END}"\\r
 	done
 
@@ -481,13 +481,14 @@ if ${ADDON_IS_SET} ; then
 		MSG="${L_92}${ADDONS}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		${SUDO} make +s +j${NUMCPU} -C \
+		MAKEFLAGS="-s -j${NUMCPU}"
+		${SUDO} +make ${MAKEFLAGS} -C \
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
 		NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
 		if [[ ! ${NOTBUILT} == "" ]]; then
-			MSG="${L_94}:"
+			MSG"${L_94}"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			for i in ${NOTBUILT}
 			do
