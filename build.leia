@@ -481,8 +481,8 @@ if ${ADDON_IS_SET} ; then
 		MSG="${L_92}${ADDONS}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		MAKEFLAGS="-s -j${NUMCPU}"
-		${SUDO} +make ${MAKEFLAGS} -C \
+		MAKEFLAGS="s j${NUMCPU}"
+		${SUDO} make -s -j${NUMCPU} -C \
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
