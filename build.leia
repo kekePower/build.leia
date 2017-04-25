@@ -120,7 +120,7 @@ KODIVERSION=Leia
 KODI=${KODIDIR}/${KODIVERSION}
 
 if ${USE_SUDO} ; then
-	SUDO="$( which sudo ) -E"
+	SUDO=$( which sudo )
 fi
 
 MSG="${L_10} ${0:t} v${SCRIPT_VERSION}"
@@ -474,7 +474,7 @@ if ${ADDON_IS_SET} ; then
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
-			${SUDO} make -s -C \
+			${SUDO} -E make -s -C \
 			tools/depends/target/binary-addons \
 			distclean \
 			> /dev/null 2>&1
@@ -486,10 +486,10 @@ if ${ADDON_IS_SET} ; then
 		export MAKEFLAGS="-s -j${NUMCPU}"
 		export CFLAGS="-O3 -ffast-math -march=native"
 		export CXXFLAGS="-O3 -ffast-math -march=native"
-		${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
-		${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-		${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-		${SUDO} make -C \
+		${SUDO} -E export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
+		${SUDO} -E export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+		${SUDO} -E export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+		${SUDO} -E make -C \
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
