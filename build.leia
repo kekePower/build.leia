@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.1"
+SCRIPT_VERSION="1.5.2"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -120,7 +120,7 @@ KODIVERSION=Leia
 KODI=${KODIDIR}/${KODIVERSION}
 
 if ${USE_SUDO} ; then
-	SUDO=$( which sudo )
+	SUDO="$( which sudo ) -E"
 fi
 
 MSG="${L_10} ${0:t} v${SCRIPT_VERSION}"
@@ -399,11 +399,13 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 	builtin cd ${KODI}/kodi-build
+	export CFLAGS="-O3 -ffast-math -march=native"
+	export CXXFLAGS="-O3 -ffast-math -march=native"
 	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
 	while pidof cmake > /dev/null 2>&1
 	do
-			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' )
-			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSG}${END}"\\r
+			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/\%//g' )
+			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSG}%${END}"\\r
 	done
 
 	# Why do I use a variable (FAILED) when I can just exit right here...?
@@ -481,19 +483,23 @@ if ${ADDON_IS_SET} ; then
 		MSG="${L_92}${ADDONS}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		MAKEFLAGS="s j${NUMCPU}"
-		${SUDO} make -s -j${NUMCPU} -C \
+		export MAKEFLAGS="-s -j${NUMCPU}"
+		export CFLAGS="-O3 -ffast-math -march=native"
+		export CXXFLAGS="-O3 -ffast-math -march=native"
+		${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
+		${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+		${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+		${SUDO} make -C \
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
 		NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
 		if [[ ! ${NOTBUILT} == "" ]]; then
-			MSG"${L_94}"
+			MSG="${L_94}"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			for i in ${NOTBUILT}
 			do
-				MSG="${i}"
-				echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${ARROW} ${WARNING}${MSG}${END}"
+				echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${ARROW} ${WARNING}${i}${END}"
 			done
 		fi
 	else
