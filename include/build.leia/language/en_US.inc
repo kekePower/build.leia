@@ -74,7 +74,7 @@ L_113="Cleaning up kodi-build"
 L_114="Having ccache installed will make compiling faster"
 L_115="if you compile Leia often."
 L_116="Cleaning up the ccache archive (ccache -C)"
-L_117="Do you want to clear the ccache cache completely?"
+L_117="Do you want to clear the ccache archive completely?"
 L_118="Clearing the ccache cache will significantly increase build times."
 L_119="It will also make sure you build Kodi with the latest libraries."
 

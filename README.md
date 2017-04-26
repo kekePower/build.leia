@@ -101,4 +101,5 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 ## Screenshots
 
 ![build.leia Help](https://dl.dropboxusercontent.com/u/15356427/build.leia.help.png)
-![build.leia Compile](https://dl.dropboxusercontent.com/u/15356427/build.leia.compile.png)
+![build.leia Compile with progress](https://dl.dropboxusercontent.com/u/15356427/build.leia-progress.png)
+![build.leia Compile Finished](https://dl.dropboxusercontent.com/u/15356427/build.leia.finished.png)

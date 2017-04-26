@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.2"
+SCRIPT_VERSION="1.5.3"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -143,6 +143,9 @@ elif [[ ${@} =~ "--with" ]]; then
 	for i in ${InputArray}
 	do
 		include ${0:t}/${i}
+		if ${STANDALONE} ; then
+			break
+		fi
 	done
 
 	# We default to doing a clean install if these variables are false
@@ -304,7 +307,7 @@ if ! ${GITMSG} ; then
 			if [[ $( which ccache ) ]]; then
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_119}${END}"
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81}${W} \c${END}"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81} \c${END}"
 				read emptyccache
 				if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
 					MSG="${L_116}"
@@ -405,7 +408,7 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 	while pidof cmake > /dev/null 2>&1
 	do
 			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/\%//g' )
-			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSG}%${END}"\\r
+			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99}${MSG}%${END}"\\r
 	done
 
 	# Why do I use a variable (FAILED) when I can just exit right here...?

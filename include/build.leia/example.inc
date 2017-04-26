@@ -1,5 +1,9 @@
 # Example script extension
 
+# Set this variable to true
+# It makes sure that the rest of the script is not executed.
+STANDALONE=true
+
 MSG="This is an example message."
 echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG} (INFO)${END}"
 echo "${TIME}[$(date +%T)]${END} ${WARNING}${MSG} (WARNING)${END}"
