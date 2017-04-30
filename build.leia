@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.4"
+SCRIPT_VERSION="1.5.5"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -170,6 +170,14 @@ if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 	exit
 fi
 
+# Function: CHECK_KODIBULD
+function ckeck_kodibuild () {
+
+	if [[ ! -d ${KODI}/kodi-build ]]; then
+		mkdir ${KODI}/kodi-build > /dev/null 2>&1
+	fi
+
+}
 # Funtion: REMOVE_KODI
 function remove_kodi () {
 
@@ -252,6 +260,9 @@ if ! ${ONLY_ADDONS} ; then
     
   if ! ${NOGIT_IS_SET} ; then
 
+		# We check if kodi-build exists, if not, create it.
+		ckeck_kodibuild
+
 		MSG="${L_20} ${KODIVERSION}${YesForce}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
@@ -300,6 +311,9 @@ if ! ${GITMSG} ; then
 			MSG="${L_113}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
+			
+			# We check if kodi-build exists, if not, we create it.
+			ckeck_kodibuild
 			builtin cd ${KODI}
 			${SUDO} rm -rf kodi-build > /dev/null 2>&1
 	
@@ -363,15 +377,13 @@ function configure_kodi () {
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
-			mkdir kodi-build > /dev/null 2>&1
+			ckeck_kodibuild
 			builtin cd ${KODI}/kodi-build
 			export ${CMAKE_FLAGS}
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
-			if [[ ! -d ${KODI}/kodi-build ]]; then
-				mkdir kodi-build > /dev/null 2>&1
-			fi
+			ckeck_kodibuild
 			if ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
 				MSG="${L_31} ${KODIVERSION} ${L_38}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
