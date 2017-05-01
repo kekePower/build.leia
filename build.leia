@@ -250,7 +250,7 @@ function fetch_kodi () {
 			echo "${ARROW} ${Y}git clone ${SOURCE} ${KODIVERSION}${END}"
 			MSG="${L_25}"
 			echo "${ARROW} ${WARNING}${MSG}${END}"
-			clean_exit ${0:t}
+			clean_exit ${1}
 		fi
 	fi
 }
@@ -289,7 +289,7 @@ if ! ${ONLY_ADDONS} ; then
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			loggy ${MSG}
 			if ${GITMSG} ; then
-				clean_exit ${0:t}
+				clean_exit ${1}
 			fi
 
 		else
@@ -464,7 +464,7 @@ function install_kodi () {
 		echo "${TIME}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
 		if ${FAILED} ; then
-			clean_exit ${0:t}
+			clean_exit ${1}
 		fi
 	fi
 
@@ -530,7 +530,7 @@ if ${ADDON_IS_SET} ; then
 		MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
-		clean_exit ${0:t}
+		clean_exit ${1}
 	fi
 elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
 	MSG="${L_93}"
@@ -542,14 +542,14 @@ fi
 }
 
 # Here we run all of our functions in turn
-fetch_kodi
-git_pull
-clean_kodi
-remove_kodi
-configure_kodi
-build_kodi
-install_kodi
-install_addons
+fetch_kodi ${0:t}
+git_pull ${0:t}
+clean_kodi ${0:t}
+remove_kodi ${0:t}
+configure_kodi ${0:t}
+build_kodi ${0:t}
+install_kodi ${0:t}
+install_addons ${0:t}
 
 echo "###################################################################" >> ${LOGGYLOGFILE}
 echo "#             End of compilation for ${KODIVERSION}                         #" >> ${LOGGYLOGFILE}
