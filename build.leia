@@ -1,6 +1,8 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.5"
+autoload -U zrecompile
+
+SCRIPT_VERSION="1.5.6"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -14,17 +16,30 @@ else
 	fi
 fi
 
+# Function: CLEAN_EXIT
+# Usage: clean_exit ${0:t}
+function clean_exit () {
+
+	# We remove the pid file
+	rm -f /tmp/.${1}.pid
+	
+	# Then we exit
+	exit 0
+
+}
+
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
 	echo "Please edit the configuration file located at"
 	echo "${0:a:h}/etc/${0:t}.conf.sample"
 	echo "and rename it to ${0:t}.conf"
 	echo "Script aborted."
-	rm -f /tmp/.${0:t}.pid
-	exit
+	clean_exit ${0:t}
 fi
 
 # This function is used to include common sets of files used
 # Edit the path to reflect your installation
+#        Function    $1       $2
+# Usage: include some/thing ${0:t}
 function include () {
   INC_FILE=${HOME}/bin/include/${1}.inc
 	if [[ ! -f ${INC_FILE} ]]; then
@@ -32,7 +47,7 @@ function include () {
 		echo "Supplied option \"${INC_OPT}\" is not valid."
 		echo "Not critical. Will continue and use the default \"--with=clean,addons\"."
 	else
-		. ${INC_FILE}
+		builtin source ${INC_FILE} ${2}
 	fi
 }
 
@@ -43,7 +58,7 @@ include common/input_to_array
 # We load the configuration file
 # It has to be sourced after "colors" are added since it uses some of
 # those variables
-. ${0:a:h}/etc/${0:t}.conf
+builtin source ${0:a:h}/etc/${0:t}.conf
 
 # Include the theme file specified in configuration
 include themes/${THEME:l}
@@ -78,8 +93,7 @@ else
       echo "${W}Please consider translating this script to your language.${END}"
       echo "${W}The language files can be found at"
       echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
-			rm -f /tmp/.${0:t}.pid
-      exit
+			clean_exit ${0:t}
     fi
 fi
 
@@ -94,8 +108,7 @@ function ShowHelp () {
 		eval echo \$${help}
 	done
 
-	rm -f /tmp/.build.leia.pid
-	exit
+	clean_exit ${1}
 }
 
 # We set all the variables used to false
@@ -112,8 +125,7 @@ GITMSG=false
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
-	rm -f /tmp/.build.leia.pid
-	exit
+	clean_exit ${0:t}
 fi
 
 KODIVERSION=Leia
@@ -166,12 +178,11 @@ if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 	echo "${W}**${END} ${WARNING}${L_101}${END} ${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
-	rm -f /tmp/.build.leia.pid
-	exit
+	clean_exit ${0:t}
 fi
 
 # Function: CHECK_KODIBULD
-function ckeck_kodibuild () {
+function check_kodibuild () {
 
 	if [[ ! -d ${KODI}/kodi-build ]]; then
 		mkdir ${KODI}/kodi-build > /dev/null 2>&1
@@ -239,8 +250,7 @@ function fetch_kodi () {
 			echo "${ARROW} ${Y}git clone ${SOURCE} ${KODIVERSION}${END}"
 			MSG="${L_25}"
 			echo "${ARROW} ${WARNING}${MSG}${END}"
-			rm -f /tmp/.build.leia.pid
-			exit
+			clean_exit ${0:t}
 		fi
 	fi
 }
@@ -261,7 +271,7 @@ if ! ${ONLY_ADDONS} ; then
   if ! ${NOGIT_IS_SET} ; then
 
 		# We check if kodi-build exists, if not, create it.
-		ckeck_kodibuild
+		check_kodibuild
 
 		MSG="${L_20} ${KODIVERSION}${YesForce}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -279,8 +289,7 @@ if ! ${ONLY_ADDONS} ; then
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 			loggy ${MSG}
 			if ${GITMSG} ; then
-				rm -f /tmp/.build.leia.pid
-				exit
+				clean_exit ${0:t}
 			fi
 
 		else
@@ -313,7 +322,7 @@ if ! ${GITMSG} ; then
 			loggy ${MSG}
 			
 			# We check if kodi-build exists, if not, we create it.
-			ckeck_kodibuild
+			check_kodibuild
 			builtin cd ${KODI}
 			${SUDO} rm -rf kodi-build > /dev/null 2>&1
 	
@@ -377,13 +386,13 @@ function configure_kodi () {
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
-			ckeck_kodibuild
+			check_kodibuild
 			builtin cd ${KODI}/kodi-build
 			export ${CMAKE_FLAGS}
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} >> ${LOGGYLOGFILE} 2>&1
 			loggy "###########################################################"
 		else
-			ckeck_kodibuild
+			check_kodibuild
 			if ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
 				MSG="${L_31} ${KODIVERSION} ${L_38}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -455,8 +464,7 @@ function install_kodi () {
 		echo "${TIME}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
 		if ${FAILED} ; then
-			rm -f /tmp/.build.leia.pid
-			exit
+			clean_exit ${0:t}
 		fi
 	fi
 
@@ -522,8 +530,7 @@ if ${ADDON_IS_SET} ; then
 		MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
-		rm -f /tmp/.build.leia.pid
-		exit
+		clean_exit ${0:t}
 	fi
 elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
 	MSG="${L_93}"
@@ -552,4 +559,4 @@ echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi${END}"
 echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}:${END}"
 echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${LOGGYLOGFILE}${END}"
 
-rm -f /tmp/.${0:t}.pid
+clean_exit ${0:t}
