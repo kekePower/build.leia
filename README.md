@@ -95,7 +95,7 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 * Make the installer more robust when it comes to updating.
 	* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.
 * ~~Move the hardcoded text from build.leia into the language files~~
-* Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo
+* ~~Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo~~
 * More to come...
 
 ## Screenshots
