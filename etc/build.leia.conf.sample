@@ -1,4 +1,4 @@
-# v3
+# v4
 # Configuration for build.leia
 
 # Set your color theme
@@ -25,12 +25,13 @@ SOURCE=https://github.com/xbmc/xbmc
 INCLUDEDIR="${HOME}/bin/include"
 
 # This is the location of the log output
-LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)"
+# Will create a separate log file for every build based on the time you started
+LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)-$(date +%T)"
 
 # Language option.
 # Supports
-# * Norwegian (no_NB)
-# * English (en_US)
+# * Norwegian Bokmål (no_NB)
+# * American English (en_US)
 #
 MyLANG=en_US
 
