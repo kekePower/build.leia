@@ -374,9 +374,11 @@ fi # End of the GITMSG check
 function configure_kodi () {
 	
 	if [[ ! -f /usr/lib64/libcrossguid.so.0 || ! -f /usr/local/lib64/libcrossguid.so.0 || ! -f /usr/lib/libcrossguid.so.0 || ! -f /usr/local/lib/libcrossguid.so.0 ]]; then
+		builtin cd ${KODI}
 		${SUDO} -E make -C tools/depends/target/crossguid PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
 	fi
 	if [[ ! -f /usr/local/lib/libfmt.a ]]; then
+		builtin cd ${KODI}
 		${SUDO} -E make -C tools/depends/target/libfmt PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
 	fi
 	
