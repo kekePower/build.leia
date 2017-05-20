@@ -219,9 +219,6 @@ fi
 		NOGIT_IS_SET=true
 	fi
 
-else
-	echo "Not valid input: ${@}"
-	clean_exit ${0:t}
 fi
 
 # We check to see if clean and dirty are set at the same time.
