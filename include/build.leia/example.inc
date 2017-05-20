@@ -1,5 +1,5 @@
 # Example script extension
-# To see it in action, run "build.leia --with=example
+# To see it in action, run "build.leia --with=example"
 
 # Set this variable to true
 # It makes sure that the rest of the script is not executed.

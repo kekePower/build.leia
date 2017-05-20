@@ -2,7 +2,7 @@
 
 autoload -U zrecompile
 
-SCRIPT_VERSION="1.5.7"
+SCRIPT_VERSION="1.5.8"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -147,7 +147,9 @@ if [[ ! ${@} || ${@} == "" ]] ; then
 	loggy ${MSG}
 	include ${0:t}/clean
 	include ${0:t}/addons
-elif [[ ${@} =~ "--with" ]]; then
+fi
+
+if [[ ${@} =~ "--with" ]]; then
 
 	# Initialze the array in the function InputToArray before use
 	# Options are: --with=clean,dirty,addons,no-git,force,only-addons
@@ -161,7 +163,7 @@ elif [[ ${@} =~ "--with" ]]; then
 	done
 
 	# We default to doing a clean install if these variables are false
-	if ( ! ${CLEAN_IS_SET} || ! ${DIRTY_IS_SET} ) || ! ${ONLY_ADDONS} ; then
+	if ( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 		MSG="${L_100} --with=clean"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
@@ -313,7 +315,7 @@ fi
 function clean_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
-if ! ${GITMSG} ; then
+if ! ${GITMSG} || ! ${ONLY_ADDONS} ; then
   
 	if ! ${FRESH_INSTALL} ; then
 		if ${CLEAN_IS_SET} ; then
@@ -417,7 +419,7 @@ function configure_kodi () {
 function build_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
-if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
+if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 
 	MSG="${L_30} ${KODIVERSION}"
 	loggy ${MSG}
@@ -432,7 +434,7 @@ if ! ${GITMSG} || ${FORCE_IS_SET} && ! ${ONLY_ADDONS} ; then
 	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
 	while pidof cmake > /dev/null 2>&1
 	do
-			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/\%//g' )
+			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | grep -v Download | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/%//g' )
 			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99}${MSG}%${END}"\\r
 	done
 
@@ -525,6 +527,21 @@ if ${ADDON_IS_SET} ; then
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
+#		while pidof make || pidof configure > /dev/null 2>&1
+#			do
+#				MSG=$( grep "^Scanning dependencies of target" ${LOGGYLOGFILE} | tail -1 | awk '{print $5}' )
+#				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_33}: ${MSG}${END}"\\r
+#			done
+#		while pidof cmake > /dev/null 2>&1
+#			do
+#				MSG=$( grep "^Scanning dependencies of target" ${LOGGYLOGFILE} | tail -1 | awk '{print $5}' )
+#				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_33}: ${MSG}${END}"\\r
+#			done
+#		while pidof gmake > /dev/null 2>&1
+#			do
+#				MSG=$( grep "^Scanning dependencies of target" ${LOGGYLOGFILE} | tail -1 | awk '{print $5}' )
+#				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_33}: ${MSG}${END}"\\r
+#			done
 		NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
 		if [[ ! ${NOTBUILT} == "" ]]; then
 			MSG="${L_94}"
