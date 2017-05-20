@@ -2,7 +2,7 @@
 
 autoload -U zrecompile
 
-SCRIPT_VERSION="1.5.8"
+SCRIPT_VERSION="1.5.9"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -372,6 +372,13 @@ fi # End of the GITMSG check
 
 # Function: CONFIGURE_KODI
 function configure_kodi () {
+	
+	if [[ ! -f /usr/lib64/libcrossguid.so.0 || ! -f /usr/local/lib64/libcrossguid.so.0 || ! -f /usr/lib/libcrossguid.so.0 || ! -f /usr/local/lib/libcrossguid.so.0 ]]; then
+		${SUDO} -E make -C tools/depends/target/crossguid PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
+	fi
+	if [[ ! -f /usr/local/lib/libfmt.a ]]; then
+		${SUDO} -E make -C tools/depends/target/libfmt PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
+	fi
 	
 	if ${NOCCACHE_IS_SET} ; then
 		EXTRA_OPTIONS="-DENABLE_CCACHE:BOOL=OFF"
