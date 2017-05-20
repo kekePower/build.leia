@@ -1,8 +1,6 @@
 #!/bin/env zsh
 
-autoload -U zrecompile
-
-SCRIPT_VERSION="1.5.9"
+SCRIPT_VERSION="1.5.10"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -121,6 +119,8 @@ FRESH_INSTALL=false
 ONLY_ADDONS=false
 NOCCACHE_IS_SET=false
 GITMSG=false
+STANDALONE=false
+DEBUG=false
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
@@ -132,7 +132,8 @@ KODIVERSION=Leia
 KODI=${KODIDIR}/${KODIVERSION}
 
 if ${USE_SUDO} ; then
-	SUDO=$( which sudo )
+	SUDOa=$( which sudo )
+	SUDO="${SUDOa} -E"
 fi
 
 MSG="${L_10} ${0:t} v${SCRIPT_VERSION}"
@@ -156,11 +157,58 @@ if [[ ${@} =~ "--with" ]]; then
 	InputToArray ${@}
 	for i in ${InputArray}
 	do
-		include ${0:t}/${i}
+		include ${0:t}/${i}	
 		if ${STANDALONE} ; then
 			break
 		fi
 	done
+
+if ${DEBUG} ; then
+
+	if ${FORCE_IS_SET} ; then
+		echo "Force is set"
+	else
+		echo "Force is NOT set"
+	fi
+	if ${CLEAN_IS_SET} ; then
+		echo "Clean is set"
+	else
+		echo "Clean is NOT set"
+	fi
+	if ${ADDON_IS_SET} ; then
+		echo "Addons is set"
+	else
+		echo "Addons is NOT set"
+	fi
+	if ${DIRTY_IS_SET} ; then
+		echo "Dirty is set"
+	else
+		echo "Dirty is NOT set"
+	fi
+	if ${NOGIT_IS_SET} ; then
+		echo "No-git is set"
+	else
+		echo "No-git is NOT set"
+	fi
+	if ${FRESH_INSTALL} ; then
+		echo "Fresh Install is set"
+	else
+		echo "Fresh is NOT set"
+	fi
+	if ${ONLY_ADDONS} ; then
+		echo "Only Addons is set"
+	else
+		echo "Only Addons is NOT set"
+	fi
+	if ${NOCCACHE_IS_SET} ; then
+		echo "NoCcache is set"
+	else
+		echo "NoCccahe is NOT set"
+	fi
+
+clean_exit ${0:t}
+
+fi
 
 	# We default to doing a clean install if these variables are false
 	if ( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ) && ! ${ONLY_ADDONS} ; then
@@ -172,6 +220,9 @@ if [[ ${@} =~ "--with" ]]; then
 		NOGIT_IS_SET=true
 	fi
 
+else
+	echo "Not valid input: ${@}"
+	clean_exit ${0:t}
 fi
 
 # We check to see if clean and dirty are set at the same time.
