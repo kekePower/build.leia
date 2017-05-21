@@ -71,7 +71,8 @@ Doing this enables me to check the log file if something happens and I can then 
 
 This is the example extension I've made that showcases some of the functionality of **build.leia**.
 
-```# Example script extension
+```bash
+# Example script extension
 # To see it in action, run "build.leia --with=example"
 
 # Set this variable to true
@@ -93,6 +94,7 @@ loggy ${MSG}
 # directly to the log-file
 echo "This is a command from the example extension" >> ${LOGGYLOGFILE} 2>&1 # I know the variable name sucks...
 
-module_exit ${1}```
+module_exit ${1}
+```
 
 That's all for now.
