@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.11"
+SCRIPT_VERSION="1.5.12"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -20,6 +20,19 @@ function clean_exit () {
 
 	# We remove the pid file
 	rm -f /tmp/.${1}.pid
+	
+	# Then we exit
+	exit 0
+
+}
+
+# Function: MODULE_EXIT
+# Usage: module_exit ${0:t}
+function module_exit () {
+
+	PID=$( echo ${1} | cut -d\/ -f1 )
+	# We remove the pid file
+	rm -f /tmp/.${PID}.pid
 	
 	# Then we exit
 	exit 0
@@ -156,7 +169,7 @@ if [[ ${@} =~ "--with" ]]; then
 	InputToArray ${@}
 	for i in ${InputArray}
 	do
-		include ${0:t}/${i}	
+		include ${0:t}/${i}
 		if ${STANDALONE} ; then
 			break
 		fi
