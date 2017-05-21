@@ -2,15 +2,25 @@
 
 It's really simple.
 
-Add your script to **~/bin/include/build.leia/** and name it **extension.inc**.
+Add your script to **~/bin/include/build.leia/** and name it **extension.inc** or whatever you want to call your creation.
 
 Within this script, you can write anything you want it to do. Be it to compile Krypton or whatever, really.
 
+You can, and should, add a small description at the top.
+
+**`# This extension will make coffee`**
+
+The second line should be
+
+**`STANDALONE=true`**
+
+This makes sure that build.leia doesn't continue when your script has done its magic.
+
 What you have to add at the end, always, is
 
-**`rm -f /tmp/.build.leia.pid`**
+**`module_exit ${1}`**
 
-**`exit`**
+You can use **module_exit ${1}** every time you want to exit for any reason and at any time.
 
 The first line deletes the pid file created at the beginning of the script and this has to be done before exiting.
 
@@ -57,5 +67,32 @@ Doing this enables me to check the log file if something happens and I can then 
 
 `${NUMCPU}` checks the system for the number of cores and/or threads available and uses that number to compile. Use it to speed up compilation.
 
+## Putting it all together
+
+This is the example extension I've made that showcases some of the functionality of **build.leia**.
+
+`# Example script extension
+# To see it in action, run "build.leia --with=example"
+
+# Set this variable to true
+# It makes sure that the rest of the script is not executed.
+STANDALONE=true
+
+MSG="This is an example message."
+echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG} (INFO)${END}"
+echo "${TIME}[$(date +%T)]${END} ${WARNING}${MSG} (WARNING)${END}"
+echo "${TIME}[$(date +%T)]${END} ${W}${MSG} (W)${END}"
+echo "${TIME}[$(date +%T)]${END} ${OTHER}${MSG} (OTHER)${END}"
+echo "${TIME}[$(date +%T)]${END} ${TIME}${MSG} (TIME)${END}"
+echo "${TIME}[$(date +%T)]${END} ${ARROW} ${INFO}${MSG} (ARROW,INFO)${END}"
+
+# You can use the loggy function to add info to the log file
+loggy ${MSG}
+
+# You can also direct output of the commands you run in your extension
+# directly to the log-file
+echo "This is a command from the example extension" >> ${LOGGYLOGFILE} 2>&1 # I know the variable name sucks...
+
+module_exit ${1}`
 
 That's all for now.
