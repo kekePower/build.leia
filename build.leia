@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.10"
+SCRIPT_VERSION="1.5.11"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -420,10 +420,11 @@ fi # End of the GITMSG check
 # Function: CONFIGURE_KODI
 function configure_kodi () {
 	
-	if [[ ! -f /usr/lib64/libcrossguid.so.0 || ! -f /usr/local/lib64/libcrossguid.so.0 || ! -f /usr/lib/libcrossguid.so.0 || ! -f /usr/local/lib/libcrossguid.so.0 ]]; then
+	if [[ ! -f /usr/local/lib/libcrossguid.a || ! -f /usr/local/lib64/libcrossguid.a || ! -f /usr/lib/libcrossguid.a || ! -f /usr/lib64/libcrossguid.a ]]; then
 		builtin cd ${KODI}
 		${SUDO} make -C tools/depends/target/crossguid PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
 	fi
+	# We have to use libfmt provided by Kodi as the build will fail with others
 	if [[ ! -f /usr/local/lib/libfmt.a ]]; then
 		builtin cd ${KODI}
 		${SUDO} make -C tools/depends/target/libfmt PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
