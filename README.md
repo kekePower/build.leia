@@ -98,6 +98,12 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 * ~~Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo~~
 * More to come...
 
+## Extensions
+
+I've written two extension that are not included in the tar-ball.
+
+You can download them at [my gist page](https://gist.github.com/kekePower)
+
 ## Screenshots
 
 ![build.leia Help](https://dl.dropboxusercontent.com/u/15356427/build.leia.help.png)
