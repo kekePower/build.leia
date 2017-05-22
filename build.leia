@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.12"
+SCRIPT_VERSION="1.5.13"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -18,22 +18,12 @@ fi
 # Usage: clean_exit ${0:t}
 function clean_exit () {
 
-	# We remove the pid file
-	rm -f /tmp/.${1}.pid
-	
-	# Then we exit
-	exit 0
-
-}
-
-# Function: MODULE_EXIT
-# Usage: module_exit ${0:t}
-function module_exit () {
-
+	# We have to make sure that we get the name "build.leia"
 	PID=$( echo ${1} | cut -d\/ -f1 )
+
 	# We remove the pid file
-	rm -f /tmp/.${PID}.pid
-	
+	rm -f /tmp/.${PID}.pid > /dev/null 2>&1
+
 	# Then we exit
 	exit 0
 
@@ -133,7 +123,6 @@ ONLY_ADDONS=false
 NOCCACHE_IS_SET=false
 GITMSG=false
 STANDALONE=false
-DEBUG=false
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
@@ -174,53 +163,6 @@ if [[ ${@} =~ "--with" ]]; then
 			break
 		fi
 	done
-
-if ${DEBUG} ; then
-
-	if ${FORCE_IS_SET} ; then
-		echo "Force is set"
-	else
-		echo "Force is NOT set"
-	fi
-	if ${CLEAN_IS_SET} ; then
-		echo "Clean is set"
-	else
-		echo "Clean is NOT set"
-	fi
-	if ${ADDON_IS_SET} ; then
-		echo "Addons is set"
-	else
-		echo "Addons is NOT set"
-	fi
-	if ${DIRTY_IS_SET} ; then
-		echo "Dirty is set"
-	else
-		echo "Dirty is NOT set"
-	fi
-	if ${NOGIT_IS_SET} ; then
-		echo "No-git is set"
-	else
-		echo "No-git is NOT set"
-	fi
-	if ${FRESH_INSTALL} ; then
-		echo "Fresh Install is set"
-	else
-		echo "Fresh is NOT set"
-	fi
-	if ${ONLY_ADDONS} ; then
-		echo "Only Addons is set"
-	else
-		echo "Only Addons is NOT set"
-	fi
-	if ${NOCCACHE_IS_SET} ; then
-		echo "NoCcache is set"
-	else
-		echo "NoCccahe is NOT set"
-	fi
-
-clean_exit ${0:t}
-
-fi
 
 	# We default to doing a clean install if these variables are false
 	if ( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ) && ! ${ONLY_ADDONS} ; then

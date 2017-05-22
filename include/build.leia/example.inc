@@ -20,4 +20,4 @@ loggy ${MSG}
 # directly to the log-file
 echo "This is a command from the example extension" >> ${LOGGYLOGFILE} 2>&1 # I know the variable name sucks...
 
-module_exit ${1}
+clean_exit ${1}

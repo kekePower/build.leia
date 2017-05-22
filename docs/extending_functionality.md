@@ -18,7 +18,7 @@ This makes sure that build.leia doesn't continue when your script has done its m
 
 What you have to add at the end, always, is
 
-**`module_exit ${1}`**
+**`clean_exit ${1}`**
 
 You can use **module_exit ${1}** every time you want to exit for any reason and at any time.
 
@@ -94,7 +94,7 @@ loggy ${MSG}
 # directly to the log-file
 echo "This is a command from the example extension" >> ${LOGGYLOGFILE} 2>&1 # I know the variable name sucks...
 
-module_exit ${1}
+clean_exit ${1}
 ```
 
 That's all for now.
