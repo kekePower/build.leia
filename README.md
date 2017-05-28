@@ -65,6 +65,8 @@ Your options are:
 
 **--with=only-addons** - Will clean and compile and install the binary-addons only
 
+**--with=nn** - Will disable the two questions about clearing ccache and deleting PREFIX. This also defaults to include **--with=clean,addons**.
+
 You can use any of these options together, except from **clean** and **dirty**.
 
 **build.leia --with=clean,addons,force** will remove the **kodi-build** directory, recreate it, check to see if there are updates from Github and even if there are no new updates, it will continue with the compilation and lastly it will do a **distclean** for the binary-addons and re-compile them.
@@ -92,8 +94,8 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 * I'd like to see a way for the script to check for known dependencies
 	* If some are missing, download them (git?), compile and install them
 	* The main problem here is that we can't really catch missing dependecies of these unless we go through all of them manually and set up some sort of order
-* Make the installer more robust when it comes to updating.
-	* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.
+* ~~Make the installer more robust when it comes to updating.~~
+	~~* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.~~
 * ~~Move the hardcoded text from build.leia into the language files~~
 * ~~Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo~~
 * More to come...

@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.13"
+SCRIPT_VERSION="1.5.14"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -112,17 +112,8 @@ function ShowHelp () {
 	clean_exit ${1}
 }
 
-# We set all the variables used to false
-ADDON_IS_SET=false
-CLEAN_IS_SET=false
-DIRTY_IS_SET=false
-FORCE_IS_SET=false
-NOGIT_IS_SET=false
-FRESH_INSTALL=false
-ONLY_ADDONS=false
-NOCCACHE_IS_SET=false
-GITMSG=false
-STANDALONE=false
+# These are all the defaults set to false
+include ${0:t}/defaults
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
@@ -196,28 +187,34 @@ function check_kodibuild () {
 # Funtion: REMOVE_KODI
 function remove_kodi () {
 
-if ! ${ONLY_ADDONS} ; then
+if ! ${DISABLE_DELETE_PREFIX} ; then
 
-if [[ -d ${PREFIX} ]]; then
+	if ! ${ONLY_ADDONS} ; then
 
-	MSG="${L_98}"
-	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
-	loggy ${MSG}
-	MSG="${L_97} ${L_81}${END}${Y} \c"
-	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
-	read removekodi
-	
-	if [[ ${removekodi} == "" || ${removekodi} == "${L_82}" || ${removekodi} == "${L_83}" ]]; then
-		MSG="${L_80} ${PREFIX}"
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
-		loggy ${MSG}
-		${SUDO} rm -rf ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
+		if [[ -d ${PREFIX} ]]; then
+
+			MSG="${L_98}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+			loggy ${MSG}
+			MSG="${L_97} ${L_81}${END}${Y} \c"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+			read removekodi
+
+			if [[ ${removekodi} == "" || ${removekodi} == "${L_82}" || ${removekodi} == "${L_83}" ]]; then
+				MSG="${L_80} ${PREFIX}"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+				loggy ${MSG}
+				${SUDO} rm -rf ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
+			fi
+
+		fi
+
 	fi
 
 fi
 
-fi
 }
+
 # Function: FETCH_KODI
 function fetch_kodi () {
 	if [[ ! -d ${KODI} ]]; then
@@ -332,41 +329,47 @@ if ! ${GITMSG} || ! ${ONLY_ADDONS} ; then
 			check_kodibuild
 			builtin cd ${KODI}
 			${SUDO} rm -rf kodi-build > /dev/null 2>&1
-	
-		if ! ${NOCCACHE_IS_SET} ; then
-			if [[ $( which ccache ) ]]; then
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_119}${END}"
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81} \c${END}"
-				read emptyccache
-				if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
-					MSG="${L_116}"
-					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
-					loggy ${MSG}
-					ccache -C >> ${LOGGYLOGFILE} 2>&1
+
+		if ! ${DISABLE_CCACHE_Q} ; then
+
+			if ! ${NOCCACHE_IS_SET} ; then
+				if [[ $( which ccache ) ]]; then
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_119}${END}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81} \c${END}"
+					read emptyccache
+					if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
+						MSG="${L_116}"
+						echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+						loggy ${MSG}
+						ccache -C >> ${LOGGYLOGFILE} 2>&1
+					fi
 				fi
-			fi
-		fi # End of check for no-ccache check
+			fi # End of check for no-ccache check
+
+		fi # End of DISABLE_CCACHE_Q from nn.inc
 
 	fi # End of clean check
 	else
-	if ! ${CCACHE_IS_SET} ; then
-		if [[ $( which ccache ) ]]; then
-			MSG="${L_118}"
-			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
-			MSG="${L_119}"
-			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
-			MSG="${L_117} ${L_81}}"
-			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${W} \c${END}"
-			read emptyccache
-			if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
-				MSG="${L_116}"
-				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
-				loggy ${MSG}
-				ccache -C >> ${LOGGYLOGFILE} 2>&1
-			fi
-		fi
-	fi # End of no-ccache check
+		if ! ${DISABLE_CCACHE_Q} ; then
+			if ! ${CCACHE_IS_SET} ; then
+				if [[ $( which ccache ) ]]; then
+					MSG="${L_118}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+					MSG="${L_119}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+					MSG="${L_117} ${L_81}}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${W} \c${END}"
+					read emptyccache
+					if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
+						MSG="${L_116}"
+						echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+						loggy ${MSG}
+						ccache -C >> ${LOGGYLOGFILE} 2>&1
+					fi
+				fi
+			fi # End of no-ccache check
+		fi # End of DISABLE_CCACHE_Q from nn.inc
 	fi
 fi # End of the GITMSG check
 
@@ -375,7 +378,7 @@ fi # End of the GITMSG check
 # Function: CONFIGURE_KODI
 function configure_kodi () {
 	
-	if [[ ! -f /usr/local/lib/libcrossguid.a || ! -f /usr/local/lib64/libcrossguid.a || ! -f /usr/lib/libcrossguid.a || ! -f /usr/lib64/libcrossguid.a ]]; then
+	if [[ ! -f /usr/local/lib/libcrossguid.a ]] && [[ ! -f /usr/local/lib64/libcrossguid.a ]] && [[ ! -f /usr/lib/libcrossguid.a ]] && [[ ! -f /usr/lib64/libcrossguid.a ]]; then
 		builtin cd ${KODI}
 		${SUDO} make -C tools/depends/target/crossguid PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
 	fi
@@ -539,21 +542,6 @@ if ${ADDON_IS_SET} ; then
 		tools/depends/target/binary-addons \
 		PREFIX=${PREFIX} \
 		>> ${LOGGYLOGFILE} 2>&1
-#		while pidof make || pidof configure > /dev/null 2>&1
-#			do
-#				MSG=$( grep "^Scanning dependencies of target" ${LOGGYLOGFILE} | tail -1 | awk '{print $5}' )
-#				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_33}: ${MSG}${END}"\\r
-#			done
-#		while pidof cmake > /dev/null 2>&1
-#			do
-#				MSG=$( grep "^Scanning dependencies of target" ${LOGGYLOGFILE} | tail -1 | awk '{print $5}' )
-#				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_33}: ${MSG}${END}"\\r
-#			done
-#		while pidof gmake > /dev/null 2>&1
-#			do
-#				MSG=$( grep "^Scanning dependencies of target" ${LOGGYLOGFILE} | tail -1 | awk '{print $5}' )
-#				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_33}: ${MSG}${END}"\\r
-#			done
 		NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
 		if [[ ! ${NOTBUILT} == "" ]]; then
 			MSG="${L_94}"
