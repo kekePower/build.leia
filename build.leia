@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.14"
+SCRIPT_VERSION="1.5.15"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -237,7 +237,7 @@ function fetch_kodi () {
 			read binaryaddons
 			
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
-				ADDON_IS_SET=true
+				FRESH_ADDON_IS_SET=true
 				FRESH_INSTALL=true
 			else
 				MSG="${L_106}"
@@ -493,75 +493,81 @@ function install_kodi () {
 # Function: INSTALL_ADDONS
 function install_addons () {
 
+# This is basically a hack to make addons install work during a fresh install
+# without changing too much of the code.
+if ( ${FRESH_ADDON_IS_SET} && ${FRESH_INSTALL} ) ; then
+	FRESH_INSTALL=false
+fi
+
 if ! ${FRESH_INSTALL} ; then
 
-if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
-	CLEAN_IS_SET=true
-	ADDONS=" (${L_38:u})"
-fi
-
-if ${ONLY_ADDONS} ; then
-	ADDON_IS_SET=true
-	if [[ -f ${PREFIX}/bin/kodi ]]; then
-		FAILED=false
-	else
-		FAILED=true
+	if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
+		CLEAN_IS_SET=true
+		ADDONS=" (${L_38:u})"
 	fi
-	CLEAN_IS_SET=true
-	ADDONS=" ${L_95}"
-fi
 
-if ${ADDON_IS_SET} ; then
-	if ! ${FAILED} ; then
-		if ${CLEAN_IS_SET} ; then
-			MSG="${L_91}${ADDONS}"
+	if ${ONLY_ADDONS} ; then
+		ADDON_IS_SET=true
+		if [[ -f ${PREFIX}/bin/kodi ]]; then
+			FAILED=false
+		else
+			FAILED=true
+		fi
+		CLEAN_IS_SET=true
+		ADDONS=" ${L_95}"
+	fi
+
+	if ${ADDON_IS_SET} ; then
+		if ! ${FAILED} ; then
+			if ${CLEAN_IS_SET} ; then
+				MSG="${L_91}${ADDONS}"
+				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+				loggy ${MSG}
+				builtin cd ${KODI}
+				${SUDO} make -s -C \
+				tools/depends/target/binary-addons \
+				distclean \
+				> /dev/null 2>&1
+			fi
+
+			MSG="${L_92}${ADDONS}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			builtin cd ${KODI}
-			${SUDO} make -s -C \
-			tools/depends/target/binary-addons \
-			distclean \
-			> /dev/null 2>&1
-		fi
-
-		MSG="${L_92}${ADDONS}"
-		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		loggy ${MSG}
 		
-		# This is a test to see if it is possible to speed up the compilation of
-		# the binary addons. Looks like some of them are using all of the availble
-		# CPUS/threads, while others don't.
-		# Don't think I'll be able to do anything about it.
-		export MAKEFLAGS="-s -j${NUMCPU}"
-		export CFLAGS="-O3 -ffast-math -march=native"
-		export CXXFLAGS="-O3 -ffast-math -march=native"
-		${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
-		${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-		${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-		${SUDO} make -C \
-		tools/depends/target/binary-addons \
-		PREFIX=${PREFIX} \
-		>> ${LOGGYLOGFILE} 2>&1
-		NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
-		if [[ ! ${NOTBUILT} == "" ]]; then
-			MSG="${L_94}"
+			# This is a test to see if it is possible to speed up the compilation of
+			# the binary addons. Looks like some of them are using all of the availble
+			# CPUS/threads, while others don't.
+			# Don't think I'll be able to do anything about it.
+			export MAKEFLAGS="-s -j${NUMCPU}"
+			export CFLAGS="-O3 -ffast-math -march=native"
+			export CXXFLAGS="-O3 -ffast-math -march=native"
+			${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
+			${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+			${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+			${SUDO} make -C \
+			tools/depends/target/binary-addons \
+			PREFIX=${PREFIX} \
+			>> ${LOGGYLOGFILE} 2>&1
+			NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
+			if [[ ! ${NOTBUILT} == "" ]]; then
+				MSG="${L_94}"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+				for i in ${NOTBUILT}
+				do
+					echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${ARROW} ${WARNING}${i}${END}"
+				done
+			fi
+		else
+			MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
 			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-			for i in ${NOTBUILT}
-			do
-				echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${ARROW} ${WARNING}${i}${END}"
-			done
+			loggy ${MSG}
+			clean_exit ${1}
 		fi
-	else
-		MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+	elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
+		MSG="${L_93}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 		loggy ${MSG}
-		clean_exit ${1}
 	fi
-elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
-	MSG="${L_93}"
-	echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
-	loggy ${MSG}
-fi
 
 fi
 }
