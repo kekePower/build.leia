@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.15"
+SCRIPT_VERSION="1.5.16"
 
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
 	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
@@ -19,10 +19,11 @@ fi
 function clean_exit () {
 
 	# We have to make sure that we get the name "build.leia"
-	PID=$( echo ${1} | cut -d\/ -f1 )
+	local NAME
+	NAME=$( echo ${1} | cut -d\/ -f1 )
 
 	# We remove the pid file
-	rm -f /tmp/.${PID}.pid > /dev/null 2>&1
+	rm -f /tmp/.${NAME}.pid > /dev/null 2>&1
 
 	# Then we exit
 	exit 0
@@ -544,7 +545,7 @@ if ! ${FRESH_INSTALL} ; then
 			${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
 			${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
 			${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-			${SUDO} make -C \
+			${SUDO} make -C -j${NUMCPU} \
 			tools/depends/target/binary-addons \
 			PREFIX=${PREFIX} \
 			>> ${LOGGYLOGFILE} 2>&1
