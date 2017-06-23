@@ -545,7 +545,7 @@ if ! ${FRESH_INSTALL} ; then
 			${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
 			${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
 			${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-			${SUDO} make -C -j${NUMCPU} \
+			${SUDO} make -j${NUMCPU} -C \
 			tools/depends/target/binary-addons \
 			PREFIX=${PREFIX} \
 			>> ${LOGGYLOGFILE} 2>&1
