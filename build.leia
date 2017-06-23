@@ -189,9 +189,7 @@ function check_kodibuild () {
 function remove_kodi () {
 
 if ! ${DISABLE_DELETE_PREFIX} ; then
-
 	if ! ${ONLY_ADDONS} ; then
-
 		if [[ -d ${PREFIX} ]]; then
 
 			MSG="${L_98}"
@@ -207,11 +205,8 @@ if ! ${DISABLE_DELETE_PREFIX} ; then
 				loggy ${MSG}
 				${SUDO} rm -rf ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 			fi
-
 		fi
-
 	fi
-
 fi
 
 }
