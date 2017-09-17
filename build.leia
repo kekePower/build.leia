@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.17a"
+SCRIPT_VERSION="1.5.18"
 
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
