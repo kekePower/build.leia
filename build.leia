@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.5.17"
+SCRIPT_VERSION="1.5.17a"
 
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
@@ -41,10 +41,10 @@ if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
 fi
 
 # This function is used to include common sets of files used
-# Edit the path to reflect your installation
 #        Function    $1       $2
 # Usage: include some/thing ${0:t}
 function include () {
+	# Edit this path to reflect your installation
   INC_FILE=${HOME}/bin/include/${1}.inc
 	if [[ ! -f ${INC_FILE} ]]; then
 		INC_OPT=$( echo ${1} | cut -d\/ -f2 )
@@ -101,7 +101,7 @@ else
     fi
 fi
 
-# FUNCTION: SHOWHELP
+# Function: SHOWHELP
 # Usage: ShowHelp ${0:t}
 function ShowHelp () {
 	# When you change the order in the language file, you must also update
@@ -138,11 +138,13 @@ loggy ${MSG}
 # The default behavior is to do a clean,addons install
 # Same as build.leia --with=clean,addons
 if [[ ! ${@} || ${@} == "" ]] ; then
+	
 	MSG="${L_100} --with=clean,addons"
 	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 	include ${0:t}/clean
 	include ${0:t}/addons
+
 fi
 
 if [[ ${@} =~ "--with" ]]; then
@@ -173,10 +175,12 @@ fi
 # We check to see if clean and dirty are set at the same time.
 # This is not wanted and the script will exit if found.
 if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
+	
 	echo "${W}**${END} ${WARNING}${L_101}${END} ${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
 	echo "${W}**${END} ${WARNING}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
 	clean_exit ${0:t}
+	
 fi
 
 # Function: CHECK_KODIBULD
@@ -216,6 +220,7 @@ fi
 
 # Function: FETCH_KODI
 function fetch_kodi () {
+
 	if [[ ! -d ${KODI} ]]; then
 		MSG="${L_104} ${L_81}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG} \c${END}"
@@ -253,13 +258,15 @@ function fetch_kodi () {
 			clean_exit ${1}
 		fi
 	fi
+
 }
 
 # Function: GIT_PULL
 function git_pull () {
-if ! ${FRESH_INSTALL} ; then
-if ! ${ONLY_ADDONS} ; then
-	
+
+	if ! ${FRESH_INSTALL} ; then
+	if ! ${ONLY_ADDONS} ; then
+
   if ${FORCE_IS_SET} ; then
 		FORCED="(${L_24})"
 		GITMSG=false
@@ -277,12 +284,15 @@ if ! ${ONLY_ADDONS} ; then
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
 		builtin cd ${KODI}/kodi-build
+
 		if [[ $( git rev-parse HEAD ) == $( git ls-remote $( git rev-parse --abbrev-ref @{u} | sed 's/\// /g' ) | cut -f1 ) ]]; then
 			UPTODATE=true
 		else
 			UPTODATE=false
 		fi
+
 		echo "##############################################################" >> ${LOGGYLOGFILE} 2>&1
+
 		if ${UPTODATE} ; then
 
 			MSG="${KODIVERSION} ${L_23} ${FORCED}"
@@ -305,8 +315,9 @@ if ! ${ONLY_ADDONS} ; then
 		GITMSG=false
 	fi
 
-fi
-fi
+	fi
+	fi
+
 }
 
 # Function: CLEAN_KODI
@@ -553,7 +564,7 @@ if ! ${FRESH_INSTALL} ; then
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 				for i in ${NOTBUILT}
 				do
-					echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${ARROW} ${WARNING}${i}${END}"
+					echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${WARNING}${i}${END}"
 				done
 			fi
 		else
@@ -569,6 +580,7 @@ if ! ${FRESH_INSTALL} ; then
 	fi
 
 fi
+
 }
 
 # Here we run all of our functions in turn
