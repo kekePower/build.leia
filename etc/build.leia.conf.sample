@@ -1,5 +1,8 @@
-# v4
+# v5
 # Configuration for build.leia
+
+# Define your own, personalized string to the System information screen
+MY_GIT_VERSION="by kekePower"
 
 # Set your color theme
 # Your options are

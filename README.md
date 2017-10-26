@@ -41,6 +41,18 @@ The script will first check to see if you have the Kodi Leia source in the direc
 
 It will then ask you if you also want to compile the binary-addons later.
 
+## Major hack is now included
+
+I've created a patch that lets you define your own, personalized string in the System information screen.
+
+The build.leia.conf now includes "MY_GIT_VERSION" that gives you the option to make this screen look like
+
+**Kodi 18.0-alpha1 by kekePower**
+
+Or, if you edit build.leia.conf, your own string.
+
+![System Information](https://github.com/kekePower/build.leia/blob/v1.x/docs/system-info.png)
+
 ### Command line options
 
 **build.leia** - The default is the same as **build.leia --with=clean,addons**

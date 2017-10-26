@@ -28,6 +28,8 @@ if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 	echo "build.leia is installed."
 	echo "Please edit ${HOME}/bin/etc/build.leia.conf.sample before running the script."
 	echo "Rename it to build.leia.conf when you're done editing it."
+	echo "You can also edit ${HOME}/bin/include/extra/VERSION unless you want"
+	echo "\"Kodi <version> by kekePower\" in the System information screen."
 	echo "If ${HOME}/bin is not in your PATH, you will have to add it."
 	echo "Please run \"build.leia --help\" to see your options"
 	echo "Good luck!"
