@@ -1,0 +1,37 @@
+Index: addons/skin.estuary/xml/SettingsSystemInfo.xml
+--- addons/skin.estuary/xml/SettingsSystemInfo.xml
++++ addons/skin.estuary/xml/SettingsSystemInfo.xml (unsaved)
+@@ -234,16 +234,26 @@
+ 						<font>font12</font>
+ 						<shadowcolor>black</shadowcolor>
+ 					</control>
+-					<control type="label">
+-						<description>Vendor text url</description>
++				</control>
++				<control type="grouplist">
++					<description>Vendor url</description>
++					<itemgap>10</itemgap>
++					<top>200</top>
++					<left>1210</left>
++					<width>800</width>
++					<orientation>horizontal</orientation>
++                    <control type="label">
++						<description>Vendor url text</description>
+ 						<width>auto</width>
+ 						<height>25</height>
+ 						<label>https://github.com/kekePower/build.leia</label>
+ 						<font>font12</font>
+-						<shadowcolor>black</shadowcolor>
+-					</control>
+-				</control>
+-			</control>
++						<textcolor>button_focus</textcolor>
++						<shadowcolor>black</shadowcolor>
++					</control>
++				</control>
++            </control>
++		</control>
+ 		</control>
+ 		<control type="group">
+ 			<left>0</left>
+

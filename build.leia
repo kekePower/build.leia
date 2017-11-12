@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.0"
+SCRIPT_VERSION="1.6.1"
 
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
@@ -9,7 +9,7 @@ if [[ ! -f /tmp/.${0:t}.pid ]]; then
 else
 	if [[ $( echo $$ ) != $( cat /tmp/.${0:t}.pid ) ]]; then
 		echo "You can't run two instances of this script at once!"
-		echo "Unless you have aborted the script, then you must remove /tmp/.${0:t}.pid"
+		echo "If you have aborted the script, then you must remove /tmp/.${0:t}.pid"
 		echo "before you can continue."
 		echo "Exiting."
 		exit
@@ -55,7 +55,7 @@ function include () {
 	fi
 }
 
-EXTRA_DIR="${0:a:h}/include/extra"
+EXTRA_DIR="${INCLUDEDIR}/patches"
 
 include common/colors
 include common/numcpu
@@ -231,6 +231,7 @@ function prepare_hack_pre () {
 
 	# We copy the original file from backup before we sync with git
 	cp -f ${EXTRA_DIR}/SystemInfo.cpp.orig ${KODI}/xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
+	cp -f ${EXTRA_DIR}/SettingsSystemInfo.xml.orig ${KODI}/addons/skin.estuary/xml/SettingsSystemInfo.xml>> ${LOGGYLOGFILE}
 
 }
 
@@ -241,11 +242,13 @@ function prepare_hack_post () {
 
 	# We make sure we have the latest version of the file in backup after a git pull
 	cp -f ${KODI}/xbmc/utils/SystemInfo.cpp ${EXTRA_DIR}/SystemInfo.cpp.orig >> ${LOGGYLOGFILE}
+	cp -f ${KODI}/addons/skin.estuary/xml/SettingsSystemInfo.xml ${EXTRA_DIR}/SettingsSystemInfo.xml.orig >> ${LOGGYLOGFILE}
 	
 	builtin cd ${KODI}
 	
 	# We add my hack to enable a personalize System Information screen
-	patch -p0 < ${EXTRA_DIR}/kodi-add-mageia-systeminfo.patch >> ${LOGGYLOGFILE}
+	# patch -p0 < ${EXTRA_DIR}/kodi-add-mageia-systeminfo.patch >> ${LOGGYLOGFILE}
+	patch -p0 < ${EXTRA_DIR}/add-kekePower-info.patch >> ${LOGGYLOGFILE}
 	
 }
 
@@ -481,7 +484,7 @@ function configure_kodi () {
 			check_kodibuild
 			builtin cd ${KODI}/kodi-build
 			export ${CMAKE_FLAGS}
-			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION="${MY_GIT_VERSION}" ${EXTRA_OPTIONS} >> ${LOGGYLOGFILE} 2>&1
+			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\">> ${LOGGYLOGFILE} 2>&1
 			separator_line
 		else
 			check_kodibuild
@@ -491,7 +494,7 @@ function configure_kodi () {
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 				export ${CMAKE_FLAGS}
-				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION="${MY_GIT_VERSION}" ${EXTRA_OPTIONS} >> ${LOGGYLOGFILE} 2>&1
+				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
 			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
 				MSG="${L_30} ${KODIVERSION} ${L_39}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -505,7 +508,8 @@ function configure_kodi () {
 # Function: CHECK_FOR_KODI_BIN
 function check_for_kodi_bin () {
 
-	if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
+	local APP_NAME=$( builtin cd ${KODI}/kodi-build/; ls kodi* | grep -v xrandr )
+	if [[ ! -f ${KODI}/kodi-build/${APP_NAME} ]]; then
 		MSG="${L_35} ${KODIVERSION} ${L_36}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
@@ -528,8 +532,9 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 	builtin cd ${KODI}/kodi-build
-	export CFLAGS="-O3 -ffast-math -march=native"
-	export CXXFLAGS="-O3 -ffast-math -march=native"
+	export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
+	export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
+	export CPPFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4"
 	export MAKEFLAGS="-s -j${NUMCPU}"
 	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
 	while pidof cmake > /dev/null 2>&1
@@ -615,11 +620,13 @@ if ! ${FRESH_INSTALL} ; then
 			# CPUS/threads, while others don't.
 			# Don't think I'll be able to do anything about it.
 			export MAKEFLAGS="-s -j${NUMCPU}"
-			export CFLAGS="-O3 -ffast-math -march=native"
-			export CXXFLAGS="-O3 -ffast-math -march=native"
+			export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}"
+			export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}"
+			export CPPFLAGS="-D_FORTIFY_SOURCE=2"
 			${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
-			${SUDO} export CFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
-			${SUDO} export CXXFLAGS="-O3 -ffast-math -march=native" > /dev/null 2>&1
+			${SUDO} export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}" > /dev/null 2>&1
+			${SUDO} export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}" > /dev/null 2>&1
+			${SUDO} export CPPFLAGS="-D_FORTIFY_SOURCE=2" > /dev/null 2>&1
 			${SUDO} make -j${NUMCPU} -C \
 			tools/depends/target/binary-addons \
 			PREFIX=${PREFIX} \

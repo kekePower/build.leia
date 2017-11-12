@@ -1,1 +1,2 @@
 ADDON_IS_SET=true
+NOGIT_IS_SET=true

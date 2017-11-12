@@ -1,0 +1,11 @@
+--- xbmc/utils/SystemInfo.cpp.orig	2017-10-24 19:32:37.150901534 +0200
++++ xbmc/utils/SystemInfo.cpp	2017-10-24 19:32:46.860227860 +0200
+@@ -1251,7 +1251,7 @@
+ 
+ std::string CSysInfo::GetVersion()
+ {
+-  return GetVersionShort() + " Git:" + CCompileInfo::GetSCMID();
++  return GetVersionShort() + CCompileInfo::GetSCMID();
+ }
+ 
+ std::string CSysInfo::GetBuildDate()

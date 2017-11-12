@@ -1,8 +1,16 @@
-# v5
+# v6
 # Configuration for build.leia
 
 # Define your own, personalized string to the System information screen
 MY_GIT_VERSION="by kekePower"
+
+# Here you can define your CPU for optimizations during compilation
+# See https://github.com/graysky2/kernel_gcc_patch/blob/master/README.md
+# for an explanation.
+# Sometimes "native" is the best choice. Other times, a specific setting will yield
+# better performance.
+# I use "amdfam10" for my AMD Phenom II X4 CPU
+MY_CPU_ARCH=native
 
 # Set your color theme
 # Your options are
