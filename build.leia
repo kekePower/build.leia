@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.1"
+SCRIPT_VERSION="1.6.2"
 
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
@@ -55,8 +55,6 @@ function include () {
 	fi
 }
 
-EXTRA_DIR="${INCLUDEDIR}/patches"
-
 include common/colors
 include common/numcpu
 include common/input_to_array
@@ -65,6 +63,8 @@ include common/input_to_array
 # It has to be sourced after "colors" are added since it uses some of
 # those variables
 builtin source ${0:a:h}/etc/${0:t}.conf
+
+EXTRA_DIR="${INCLUDEDIR}/patches"
 
 # Include the theme file specified in configuration
 include themes/${THEME:l}
@@ -131,6 +131,13 @@ KODI=${KODIDIR}/${KODIVERSION}
 
 if ${USE_SUDO} ; then
 	SUDO=$( which sudo )
+fi
+
+if ${USE_NINJA}; then
+		include ${0:t}/ninja
+else
+	WITH_BUILD_CMD="cmake --build . -- VERBOSE=0 -s -j${NUMCPU}"
+	SHOW_CMD="cmake"
 fi
 
 MSG="${L_10} ${0:t} v${SCRIPT_VERSION}"
@@ -457,6 +464,13 @@ fi
 
 }
 
+function kodi_downloads () {
+
+	builtin cd ${KODI}/kodi-build
+	tar xf ${EXTRA_DIR}/kodi-download.tar.xz
+
+}
+
 # Function: CONFIGURE_KODI
 function configure_kodi () {
 	
@@ -483,6 +497,9 @@ function configure_kodi () {
 			builtin cd ${KODI}
 			check_kodibuild
 			builtin cd ${KODI}/kodi-build
+			
+			# We add the tarballs that the installation automatically downloads
+			kodi_downloads
 			export ${CMAKE_FLAGS}
 			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\">> ${LOGGYLOGFILE} 2>&1
 			separator_line
@@ -494,7 +511,7 @@ function configure_kodi () {
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 				export ${CMAKE_FLAGS}
-				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
+				cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
 			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
 				MSG="${L_30} ${KODIVERSION} ${L_39}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -508,8 +525,9 @@ function configure_kodi () {
 # Function: CHECK_FOR_KODI_BIN
 function check_for_kodi_bin () {
 
-	local APP_NAME=$( builtin cd ${KODI}/kodi-build/; ls kodi* | grep -v xrandr )
-	if [[ ! -f ${KODI}/kodi-build/${APP_NAME} ]]; then
+	# local APP_NAME=$( builtin cd ${KODI}/kodi-build/; ls kodi* | grep -v xrandr )
+	# if [[ ! -f ${KODI}/kodi-build/${APP_NAME} ]]; then
+	if [[ ! -f $( builtin cd ${KODI}/kodi-build/; ls kodi* | grep -v xrandr ) ]]; then
 		MSG="${L_35} ${KODIVERSION} ${L_36}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
@@ -536,12 +554,22 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 	export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
 	export CPPFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4"
 	export MAKEFLAGS="-s -j${NUMCPU}"
-	cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
-	while pidof cmake > /dev/null 2>&1
-	do
-			MSG=$( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1" "$2}' | grep "\%" | tail -1 | cut -d\] -f1 | grep -v Download | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/%//g' )
+	${WITH_BUILD_CMD} >> ${LOGGYLOGFILE} 2>&1 &
+	
+	if [[ ${SHOW_CMD} == "ninja" ]]; then
+		while pidof ${SHOW_CMD} > /dev/null 2>&1
+		do
+			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1}' | tail -1 | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
+			MSG=$(( ${NUMBERS[1]}*100/${NUMBERS[2]} ))
 			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99}${MSG}%${END}"\\r
-	done
+		done
+	else
+		while pidof cmake > /dev/null 2>&1
+		do
+				MSG=$( grep "^\[" ${LOGGYLOGFILE} | grep "\%" | awk '{print $1}' | tail -1 | cut -d\] -f1 | grep -v Download | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/%//g' )
+				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99}${MSG}%${END}"\\r
+		done
+	fi
 
 	check_for_kodi_bin
 
@@ -558,7 +586,11 @@ function install_kodi () {
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
 		builtin cd ${KODI}/kodi-build
-		${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+		if [[ ${SHOW_CMD} == "ninja" ]]; then
+			${SUDO} ${WITH_BUILD_CMD} install >> ${LOGGYLOGFILE} 2>&1
+		else
+			${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+		fi
 		separator_line
 	elif ${FAILED} && ! ${ONLY_ADDONS} ; then
 		MSG="${L_110} ${KODIVERSION} ${L_111} ${L_25}"

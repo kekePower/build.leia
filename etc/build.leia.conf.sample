@@ -1,7 +1,9 @@
-# v6
+# v7
 # Configuration for build.leia
 
 # Define your own, personalized string to the System information screen
+# Keep the string relatively short, max 15-18 characters to be sure it
+# fits within the frame of space available.
 MY_GIT_VERSION="by kekePower"
 
 # Here you can define your CPU for optimizations during compilation
@@ -24,6 +26,11 @@ PREFIX="/opt/leia"
 # globally. You will also have to edit the PREFIX above
 # to a directory your user has write access to.
 USE_SUDO=true
+
+# Kodi can now use Ninja as its build system.
+# Set this variable to true if you want to use it.
+# false will use cmake as before.
+USE_NINJA=true
 
 # You can set extra flags to cmake here
 # This will look for extra libraries in /usr/local
