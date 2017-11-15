@@ -55,7 +55,7 @@ Or, if you edit build.leia.conf, your own string.
 
 ### You can now use Ninja and optimise the build for your CPU
 
-There is a new option to use [Ninja](https://ninja.build/) to build Kodi for you. The script will check if you have Ninja installed
+There is a new option to use [Ninja](https://ninja-build.org/) to build Kodi for you. The script will check if you have Ninja installed
 and if not, will fall back to using cmake. See [this PR](https://github.com/xbmc/xbmc/pull/12936).
 
 You have to check the differences in your current **build.leia.conf** towards the new one. There is a new entry called
