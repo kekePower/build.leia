@@ -53,12 +53,16 @@ Or, if you edit build.leia.conf, your own string.
 
 ![System Information](https://github.com/kekePower/build.leia/blob/v1.x/docs/system-info.png)
 
-### You can now use Ninja
+### You can now use Ninja and optimise the build for your CPU
 
 There is a new option to use [Ninja](https://ninja.build/) to build Kodi for you. The script will check if you have Ninja installed
 and if not, will fall back to using cmake. See [this PR](https://github.com/xbmc/xbmc/pull/12936).
 
-For now, this addition will break the progress information, but I will find a way to fix it soon.
+You have to check the differences in your current **build.leia.conf** towards the new one. There is a new entry called
+**USE_NINJA=true** or **false**. Set this to your preference.
+
+I've also added the possibility to optimise the build of Kodi for your CPU. See [the table](https://github.com/graysky2/kernel_gcc_patch/blob/master/README.md) on this page
+and use **MY_CPU_ARCH=<YourArch>**. The default is **native**, which normally is good enough.
 
 ### Command line options
 
