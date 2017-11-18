@@ -1,7 +1,8 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.2"
+SCRIPT_VERSION="1.6.3"
 
+if [[ ! ${1} == "fix" ]]; then
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
@@ -14,6 +15,8 @@ else
 		echo "Exiting."
 		exit
 	fi
+fi
+
 fi
 
 # Function: CLEAN_EXIT
@@ -31,6 +34,12 @@ function clean_exit () {
 	exit 0
 
 }
+
+# "Undocumented feature... :-)
+# Because I'm too lazy to type the delete command while testing
+if [[ ${1} == "fix" ]]; then
+	clean_exit ${0:t}
+fi
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
 	echo "Please edit the configuration file located at"
@@ -136,7 +145,7 @@ fi
 if ${USE_NINJA}; then
 		include ${0:t}/ninja
 else
-	WITH_BUILD_CMD="cmake --build . -- VERBOSE=0 -s -j${NUMCPU}"
+	WITH_BUILD_CMD=$( which cmake )
 	SHOW_CMD="cmake"
 fi
 
@@ -554,20 +563,25 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 	export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
 	export CPPFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4"
 	export MAKEFLAGS="-s -j${NUMCPU}"
-	${WITH_BUILD_CMD} >> ${LOGGYLOGFILE} 2>&1 &
 	
 	if [[ ${SHOW_CMD} == "ninja" ]]; then
+		${WITH_BUILD_CMD} >> ${LOGGYLOGFILE} 2>&1 &
 		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
-			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE} | awk '{print $1}' | tail -1 | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
-			MSG=$(( ${NUMBERS[1]}*100/${NUMBERS[2]} ))
-			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99}${MSG}%${END}"\\r
+			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE} | tail -1 | grep -v "\\%" | awk '{print $1}' | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
+			if [[ ${#NUMBERS[2]} > 3 ]]; then
+				MSG=$(( ${NUMBERS[1]}*100/${NUMBERS[2]} ))
+				MSGa=$( echo ${MSG} | sed -e "s/\%//g" )
+			fi
+			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
 		done
 	else
+		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
 		while pidof cmake > /dev/null 2>&1
 		do
-				MSG=$( grep "^\[" ${LOGGYLOGFILE} | grep "\%" | awk '{print $1}' | tail -1 | cut -d\] -f1 | grep -v Download | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' -e 's/%//g' )
-				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99}${MSG}%${END}"\\r
+				MSG=$( grep "^\[" ${LOGGYLOGFILE} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
+				MSGa=$( echo ${MSG} | sed -e "s/\%\%//g" )
+				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
 		done
 	fi
 
