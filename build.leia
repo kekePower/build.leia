@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.3"
+SCRIPT_VERSION="1.6.4"
 
 if [[ ! ${1} == "fix" ]]; then
 # A simple check to see if you're already running this script.
@@ -83,6 +83,12 @@ include themes/${THEME:l}
 # the log file use by loggy
 # Usage: loggy <message>
 include common/loggy
+
+if [[ ! -x $( which git ) ]]; then
+	MSG="${L_130}"
+	echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	clean_exit ${0:t}
+fi
 
 # We try to find the system language and include it in the script.
 # If we don't have the translation for the supplied language, the
@@ -263,7 +269,7 @@ function prepare_hack_post () {
 	builtin cd ${KODI}
 	
 	# We add my hack to enable a personalize System Information screen
-	# patch -p0 < ${EXTRA_DIR}/kodi-add-mageia-systeminfo.patch >> ${LOGGYLOGFILE}
+	patch -p0 < ${EXTRA_DIR}/kodi-add-mageia-systeminfo.patch >> ${LOGGYLOGFILE}
 	patch -p0 < ${EXTRA_DIR}/add-kekePower-info.patch >> ${LOGGYLOGFILE}
 	
 }
@@ -473,6 +479,13 @@ fi
 
 }
 
+# Function: BUILD_JSON
+function build_json () {
+
+	${SUDO} make -C ${KODI}/tools/depends/native/JsonSchemaBuilder PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
+
+}
+
 function kodi_downloads () {
 
 	builtin cd ${KODI}/kodi-build
@@ -495,6 +508,9 @@ function configure_kodi () {
 	
 	# We use this function here to print a message that ccache was not found
 	ccache_not_found
+	
+	# We build the bundled JsonSchemaBuilder
+	build_json
 
 	# We try to find the Freetype2 include directory and add it to the configuration part
 	FIND_FREETYPE_INCLUDE=$( pkg-config --cflags --libs freetype2 | awk '{print $1}' | cut -dI -f2 )
@@ -508,9 +524,12 @@ function configure_kodi () {
 			builtin cd ${KODI}/kodi-build
 			
 			# We add the tarballs that the installation automatically downloads
-			kodi_downloads
+			# kodi_downloads
+			
 			export ${CMAKE_FLAGS}
-			cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\">> ${LOGGYLOGFILE} 2>&1
+			
+			echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
+			cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"8.4.0\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
 			separator_line
 		else
 			check_kodibuild
@@ -520,7 +539,8 @@ function configure_kodi () {
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 				export ${CMAKE_FLAGS}
-				cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
+				echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
+				cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"8.4.0\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
 			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
 				MSG="${L_30} ${KODIVERSION} ${L_39}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -577,7 +597,7 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 		done
 	else
 		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
-		while pidof cmake > /dev/null 2>&1
+		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
 				MSG=$( grep "^\[" ${LOGGYLOGFILE} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
 				MSGa=$( echo ${MSG} | sed -e "s/\%\%//g" )

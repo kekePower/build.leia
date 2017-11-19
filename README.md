@@ -96,11 +96,13 @@ You can use any of these options together, except from **clean** and **dirty**.
 
 ## Troubleshooting
 
-If you're experiencing problems, it really doesn't have anything to do with the script.
+Sometimes the configuration or compilation failes. If this happens, you can try the following suggestions.
 
-Please cd into your Leia source code: **cd ${HOME}/kodi/Leia/kodi-build** and run the following command: **cmake .. -DCMAKE_INSTALL_PREFIX=/opt/leia**
+Please cd into your Leia source code: **cd ${HOME}/kodi/Leia/kodi-build** and run the following command: **cmake ..**
 
 You will see the complete output of the command and possibly find you're missing some libraries and/or tools necessary to compile Kodi. Install the missing libraries and/or tools and try again. Once you've sorted all this out, you're ready to run the script.
+
+If you experience compilation issues, a good idea is to delete the source tree and let the script download a fresh copy.
 
 ## Translations
 
