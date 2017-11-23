@@ -89,6 +89,7 @@ Your options are:
 **--with=only-addons** - Will clean and compile and install the binary-addons only
 
 **--with=nn** - Will disable the two questions about clearing ccache and deleting PREFIX. This also defaults to include **--with=clean,addons**.
+You can now use the combination **--with=clean,nn** which will skip the previous assumption. It became a neccesity for me and hopefully you'll like it too.
 
 You can use any of these options together, except from **clean** and **dirty**.
 
