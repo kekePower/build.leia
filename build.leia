@@ -525,7 +525,9 @@ fi
 # Function: BUILD_JSON
 function build_json () {
 
-	${SUDO} make -C ${KODI}/tools/depends/native/JsonSchemaBuilder PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
+	if [[ ! -a /usr/local/bin/JsonSchemaBuilder ]]; then
+		${SUDO} make -C ${KODI}/tools/depends/native/JsonSchemaBuilder PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
+	fi
 
 }
 
