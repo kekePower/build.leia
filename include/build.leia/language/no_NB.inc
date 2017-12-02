@@ -81,4 +81,7 @@ L_119="Det vil også gjøre sitt til at Kodi blir bygget med de siste biblioteke
 L_120="Det gikk veldig bra. Du kan starte Kodi med denne kommandoen"
 L_121="Du kan se hele loggen i denne filen"
 
-L_130="Du må ha git installert for å bruke dette skriptet."
+L_130="git ble ikke funnet."
+L_131="RapidJSON ble ikke funnet."
+L_132="libfmt ble ikke funnet."
+L_133="Vennligst installer "

@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.4"
+SCRIPT_VERSION="1.6.5"
 
 if [[ ! ${1} == "fix" ]]; then
 # A simple check to see if you're already running this script.
@@ -84,12 +84,6 @@ include themes/${THEME:l}
 # Usage: loggy <message>
 include common/loggy
 
-if [[ ! -x $( which git ) ]]; then
-	MSG="${L_130}"
-	echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	clean_exit ${0:t}
-fi
-
 # We try to find the system language and include it in the script.
 # If we don't have the translation for the supplied language, the
 # script will ask if the user wants to use en_US for now.
@@ -117,6 +111,55 @@ else
 			clean_exit ${0:t}
     fi
 fi
+
+# This is the pre-check section where we look for necessary binaries
+# First off is Git
+typeset -a NOT_FOUND
+if [[ ! -x $( which git ) ]]; then
+	git_MSG="${L_130}"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	git_URL="https://git-scm.org/"
+	NOT_FOUND=( git )
+fi
+
+# In Mageia 6, these two packages are not currently present
+# RapidJSON and fmt
+# Let's look for them and print out useful information
+# Looking for RapidJSON
+if [[ ! $( pkg-config --cflags RapidJSON ) ]]; then
+	rapidjson_MSG="${L_131}"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	rapidjson_URL="https://github.com/Tencent/rapidjson/releases"
+	echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	NOT_FOUND+=( rapidjson )
+fi
+
+# Now we look for libfmt in /usr/lib and /usr/local/lib
+if [[ ! -a /usr/lib/libfmt.a && ! -a /usr/lib64/libfmt.a && ! -a /usr/local/lib/libfmt.a && ! -a /usr/local/lib64/libfmt.a ]]; then
+	libfmt_MSG="${L_132}"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	libfmt_URL="https://github.com/fmtlib/fmt/releases"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	NOT_FOUND+=( libfmt )
+fi
+
+for not_found in ${NOT_FOUND}
+do
+	MSG=""
+	# MSG="\$${not_found}_MSG"
+	echo "${TIME}[$(date +%T)]${END} ${WARNING}$( eval echo \$${not_found}_MSG:u )${END}"
+	MSG="${L_133}${not_found}"
+	echo "${TIME}[$(date +%T)]${END} ${YELLOW}${MSG}${END}"
+	URL="$( eval echo \$${not_found}_URL )"
+	# URL="\$${not_found}_URL"
+	echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${URL}${END}"
+done
+if [[ ${NOT_FOUND[-1]} ]]; then
+	clean_exit ${0:t}
+fi
+
+#help=Help_${i}
+#		eval echo \$${help}
 
 # Function: SHOWHELP
 # Usage: ShowHelp ${0:t}

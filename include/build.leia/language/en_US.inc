@@ -80,3 +80,8 @@ L_119="It will also make sure you build Kodi with the latest libraries."
 
 L_120="All set. You can launch Kodi with the command"
 L_121="You can view the log output in this file"
+
+L_130="git cound not be found."
+L_131="RapidJSON could not be found."
+L_132="libfmt could not be found."
+L_133="Please install "

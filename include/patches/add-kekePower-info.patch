@@ -1,12 +1,24 @@
-Index: addons/skin.estuary/xml/SettingsSystemInfo.xml
---- addons/skin.estuary/xml/SettingsSystemInfo.xml
-+++ addons/skin.estuary/xml/SettingsSystemInfo.xml (unsaved)
-@@ -234,16 +234,26 @@
- 						<font>font12</font>
+--- SettingsSystemInfo.xml.orig	2017-11-15 13:59:29.108796515 +0100
++++ addons/skin.estuary/xml/SettingsSystemInfo.xml	2017-11-15 13:57:25.757407395 +0100
+@@ -219,6 +219,39 @@
  						<shadowcolor>black</shadowcolor>
  					</control>
--					<control type="label">
--						<description>Vendor text url</description>
+ 				</control>
++				<control type="grouplist">
++					<description>Vendor text</description>
++					<itemgap>10</itemgap>
++					<top>170</top>
++					<left>1210</left>
++					<width>800</width>
++					<orientation>horizontal</orientation>
++					<control type="label">
++						<description>Vendor text label</description>
++						<width>auto</width>
++						<height>25</height>
++						<label>Provided by kekePower</label>
++						<font>font25_title</font>
++						<shadowcolor>black</shadowcolor>
++					</control>
 +				</control>
 +				<control type="grouplist">
 +					<description>Vendor url</description>
@@ -15,23 +27,16 @@ Index: addons/skin.estuary/xml/SettingsSystemInfo.xml
 +					<left>1210</left>
 +					<width>800</width>
 +					<orientation>horizontal</orientation>
-+                    <control type="label">
-+						<description>Vendor url text</description>
- 						<width>auto</width>
- 						<height>25</height>
- 						<label>https://github.com/kekePower/build.leia</label>
- 						<font>font12</font>
--						<shadowcolor>black</shadowcolor>
--					</control>
--				</control>
--			</control>
-+						<textcolor>button_focus</textcolor>
++					<control type="label">
++						<description>Vendor text url</description>
++						<width>auto</width>
++						<height>25</height>
++						<label>https://github.com/kekePower/build.leia</label>
++						<font>font12</font>
++						<textcolor>yellow</textcolor>
 +						<shadowcolor>black</shadowcolor>
 +					</control>
 +				</control>
-+            </control>
-+		</control>
+ 			</control>
  		</control>
  		<control type="group">
- 			<left>0</left>
-
