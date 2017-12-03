@@ -1,4 +1,4 @@
-# v7
+# v8
 # Configuration for build.leia
 
 # Define your own, personalized string to the System information screen
@@ -48,14 +48,16 @@ LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)-$(date +%T)"
 
 # Language option.
 # Supports
-# * Norwegian Bokmål (no_NB)
+# * Norsk Bokmål (no_NB)
 # * American English (en_US)
-#
+# * Español Castellano (es_ES)
+
 MyLANG=en_US
 
 # Set the path to you Java installation
-# Uncomment if you want to use the system included java installation
-export JAVA_HOME=/opt/jdk
+# Uncomment if you have installed Java somewhere yourself somewhere out of the
+# regular path and set the correct path here
+# export JAVA_HOME=/opt/jdk
 
 # Set this path to where you keep the Kodi source
 KODIDIR=${HOME}/kodi # This one is where you keep the Leia directory
