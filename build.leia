@@ -23,6 +23,9 @@ fi
 # Usage: clean_exit ${0:t}
 function clean_exit () {
 
+# TMP can be /tmp or /usr/tmp or ${HOME}/tmp
+# Let's find it and use it
+# If $TMP isn't set, we default to /tmp
 if [[ $( echo ${TMP} ) ]]; then
 	TMPDIR=${TMP}
 else
@@ -33,7 +36,7 @@ fi
 	name=$( echo ${1} | cut -d\/ -f1 )
 
 	# We remove the pid file
-	rm -f /tmp/.${name}.pid > /dev/null 2>&1
+	rm -f ${TMPDIR}/.${name}.pid > /dev/null 2>&1
 
 	# Then we exit
 	exit 0
