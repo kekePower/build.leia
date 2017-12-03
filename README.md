@@ -111,11 +111,18 @@ If you experience compilation issues, a good idea is to delete the source tree a
 
 ## Translations
 
-I only know two languages, Norwegian and English, and therefore there are only these two availale.
+I only know two languages, Norwegian and English, but I've decided to add Spanish and Romanian because my woman speaks both languages and was able to help me.
 
 If you want to help out with translation, please fork the project and copy the language files from **include/build.leia/language/**.
 
 The **en_US.inc** is the most up-to-date file.
+
+So far, these are the supported languages:
+
+* Norsk Bokmål (no_NB)
+* American English (en_US)
+* Español Castellano (es_ES)
+* Română (ro_RO)
 
 ## The road ahead
 

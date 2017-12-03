@@ -51,6 +51,7 @@ LOGGYLOGFILE="${HOME}/Documents/log/build.leia.log-$(date +%F)-$(date +%T)"
 # * Norsk Bokmål (no_NB)
 # * American English (en_US)
 # * Español Castellano (es_ES)
+# * Română (ro_RO)
 
 MyLANG=en_US
 
