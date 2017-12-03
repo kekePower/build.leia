@@ -25,6 +25,10 @@ See **build.leia --help** for your options.
 * You must be in the sudoers file
 	* Unless you want to install Kodi to your home directory. Then you'll have to edit the PREFIX setting and remove the sudo commands from the script.
 
+#### Optional
+* [Ninja](https://ninja-build.org/)
+** It is now possible to use ninja to build Kodi Leia 18.0 with build.leia
+
 ## Getting the source
 
 If you want to be on the cutting-edge, you can download the **master** branch. This will have a lot of bugs until the next major version is released.
