@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.7-beta-1"
+SCRIPT_VERSION="1.6.7-beta-2"
 
 if [[ ! ${1} == "fix" ]]; then
 # A simple check to see if you're already running this script.
