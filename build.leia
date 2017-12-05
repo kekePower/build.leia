@@ -396,10 +396,10 @@ function git_pull () {
 	if ! ${ONLY_ADDONS} ; then
 
   if ${FORCE_IS_SET} ; then
-		FORCED="(${L_24})"
+		FORCED="${L_24}"
 		GITMSG=false
 	else
-		FORCED="(${L_25})"
+		FORCED="${L_25}"
 		GITMSG=true
   fi
 
