@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.7-beta-2"
+SCRIPT_VERSION="1.6.7-beta-3"
 
 if [[ ! ${1} == "fix" ]]; then
 # A simple check to see if you're already running this script.
@@ -126,52 +126,6 @@ else
     fi
 fi
 
-# This is the pre-check section where we look for necessary binaries
-# First off is Git
-typeset -a not_found
-if [[ ! -x $( which git ) ]]; then
-	git_msg="${L_130}"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	git_url="https://git-scm.org/"
-	not_found=( git )
-fi
-
-# In Mageia 6, these two packages are not currently present
-# RapidJSON and fmt
-# Let's look for them and print out useful information
-# Looking for RapidJSON
-if [[ ! $( pkg-config --cflags RapidJSON ) ]]; then
-	rapidjson_msg="${L_131}"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	rapidjson_url="https://github.com/Tencent/rapidjson/releases"
-	echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	not_found+=( rapidjson )
-fi
-
-# Now we look for libfmt in /usr/lib and /usr/local/lib
-if [[ ! -a /usr/lib/libfmt.a && ! -a /usr/lib64/libfmt.a && ! -a /usr/local/lib/libfmt.a && ! -a /usr/local/lib64/libfmt.a ]]; then
-	libfmt_msg="${L_132}"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	libfmt_url="https://github.com/fmtlib/fmt/releases"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	not_found+=( libfmt )
-fi
-
-for nf in ${not_found}
-do
-	echo "${TIME}[$(date +%T)]${END} ${WARNING}$( eval echo \$${nf}_msg:u )${END}"
-	loggy $( eval echo \$${nf}_msg:u )
-	msg="${L_133}${not_found}"
-	echo "${TIME}[$(date +%T)]${END} ${YELLOW}${msg}${END}"
-	loggy ${msg}
-	url="$( eval echo \$${nf}_url )"
-	echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${url}${END}"
-	loggy ${url}
-done
-if [[ ${not_found[-1]} ]]; then
-	clean_exit ${0:t}
-fi
-
 # Function: SHOWHELP
 # Usage: ShowHelp ${0:t}
 function ShowHelp () {
@@ -194,6 +148,52 @@ include ${0:t}/defaults
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
+	clean_exit ${0:t}
+fi
+
+# This is the pre-check section where we look for necessary binaries
+# First off is Git
+typeset -a not_found
+if [[ ! -x $( which git ) ]]; then
+	git_msg="${L_130}"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	git_url="https://git-scm.org/"
+	not_found=( git )
+fi
+
+# In Mageia 6, these two packages are not currently present
+# RapidJSON and fmt
+# Let's look for them and print out useful information
+# Looking for RapidJSON
+if [[ ! $( pkg-config --cflags RapidJSON > /dev/null 2>&1 ) ]]; then
+	rapidjson_msg="${L_131}"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	rapidjson_url="https://github.com/Tencent/rapidjson/releases"
+	echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	not_found+=( rapidjson )
+fi
+
+# Now we look for libfmt in /usr/lib and /usr/local/lib
+if [[ ! -a /usr/lib/libfmt.a && ! -a /usr/lib64/libfmt.a && ! -a /usr/local/lib/libfmt.a && ! -a /usr/local/lib64/libfmt.a ]]; then
+	libfmt_msg="${L_132}"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	libfmt_url="https://github.com/fmtlib/fmt/releases"
+	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	not_found+=( libfmt )
+fi
+
+for nf in ${not_found}
+do
+	echo "${TIME}[$(date +%T)]${END} ${WARNING}$( eval echo \$${nf}_msg:u )${END}"
+	loggy $( eval echo \$${nf}_msg:u )
+	msg="${L_133} ${nf}"
+	echo "${TIME}[$(date +%T)]${END} ${YELLOW}${msg}${END}"
+	loggy ${msg}
+	url="$( eval echo \$${nf}_url )"
+	echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${url}${END}"
+	loggy ${url}
+done
+if [[ ${not_found[-1]} ]]; then
 	clean_exit ${0:t}
 fi
 

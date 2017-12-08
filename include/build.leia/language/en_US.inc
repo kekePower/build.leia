@@ -84,7 +84,7 @@ L_121="You can view the log output in this file"
 L_130="git cound not be found."
 L_131="RapidJSON could not be found."
 L_132="libfmt could not be found."
-L_133="Please install "
+L_133="Please install"
 
 L_190="Thanks for using"
 L_191="to build ${VERSION}"

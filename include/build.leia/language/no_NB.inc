@@ -84,7 +84,7 @@ L_121="Du kan se hele loggen i denne filen"
 L_130="git ble ikke funnet."
 L_131="RapidJSON ble ikke funnet."
 L_132="libfmt ble ikke funnet."
-L_133="Vennligst installer "
+L_133="Vennligst installer"
 
 L_190="Takk for at du bruker"
 L_191="til å bygge ${VERSION}"
