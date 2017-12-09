@@ -1,8 +1,9 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.7-beta-3"
+SCRIPT_VERSION="1.6.7"
 
 if [[ ! ${1} == "fix" ]]; then
+
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
 if [[ ! -f /tmp/.${0:t}.pid ]]; then
@@ -17,7 +18,7 @@ else
 	fi
 fi
 
-fi
+fi # End of "fix" check
 
 # Function: CLEAN_EXIT
 # Usage: clean_exit ${0:t}
@@ -47,7 +48,7 @@ function clean_exit () {
 # "Undocumented" feature... :-)
 # Because I'm too lazy to type the delete command while testing
 if [[ ${1} == "fix" ]]; then
-	echo "Deleting the pid file from /tmp/"
+	echo "Deleting the pid file from ${TMPDIR}"
 	clean_exit ${0:t}
 fi
 
@@ -151,47 +152,58 @@ if [[ ${1} == "--help" ]]; then
 	clean_exit ${0:t}
 fi
 
-# This is the pre-check section where we look for necessary binaries
+# This is the pre-check section where we look for necessary binaries and libraries
+
 # First off is Git
 typeset -a not_found
 if [[ ! -x $( which git ) ]]; then
-	git_msg="${L_130}"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
 	git_url="https://git-scm.org/"
 	not_found=( git )
 fi
 
-# In Mageia 6, these two packages are not currently present
-# RapidJSON and fmt
-# Let's look for them and print out useful information
 # Looking for RapidJSON
 if [[ ! $( pkg-config --cflags RapidJSON > /dev/null 2>&1 ) ]]; then
-	rapidjson_msg="${L_131}"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	rapidjson_url="https://github.com/Tencent/rapidjson/releases"
-	echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	target="tools/depends/target"
 	not_found+=( rapidjson )
 fi
 
 # Now we look for libfmt in /usr/lib and /usr/local/lib
 if [[ ! -a /usr/lib/libfmt.a && ! -a /usr/lib64/libfmt.a && ! -a /usr/local/lib/libfmt.a && ! -a /usr/local/lib64/libfmt.a ]]; then
-	libfmt_msg="${L_132}"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
-	libfmt_url="https://github.com/fmtlib/fmt/releases"
-	#echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
+	target="tools/depends/target"
 	not_found+=( libfmt )
+fi
+
+# Looking for crossguid
+if [[ ! -f /usr/local/lib/libcrossguid.a ]] && [[ ! -f /usr/local/lib64/libcrossguid.a ]] && [[ ! -f /usr/lib/libcrossguid.a ]] && [[ ! -f /usr/lib64/libcrossguid.a ]]; then
+	target="tools/depends/target"
+	not_found+=( crossguid )
+fi
+
+# Looking for JsonSchemaBuilder
+if [[ ! -a /usr/local/bin/JsonSchemaBuilder ]]; then
+	target="tools/depends/native"
+	not_found+=( JsonSchemaBuilder )
 fi
 
 for nf in ${not_found}
 do
-	echo "${TIME}[$(date +%T)]${END} ${WARNING}$( eval echo \$${nf}_msg:u )${END}"
-	loggy $( eval echo \$${nf}_msg:u )
+	if [[ ${nf} == "git" ]]; then
+		msg="${L_131}"
+	else
+		msg="${nf} ${L_130}"
+	fi
+	echo "${TIME}[$(date +%T)]${END} ${WARNING}${msg}${END}"
+	loggy ${msg}
 	msg="${L_133} ${nf}"
 	echo "${TIME}[$(date +%T)]${END} ${YELLOW}${msg}${END}"
 	loggy ${msg}
+	builtin cd ${KODI}
+	${SUDO} make -C ${target}/${nf} PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
 	url="$( eval echo \$${nf}_url )"
-	echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${url}${END}"
-	loggy ${url}
+	if [[ ${url} ]]; then
+		echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${url}${END}"
+		loggy ${url}
+	fi
 done
 if [[ ${not_found[-1]} ]]; then
 	clean_exit ${0:t}
@@ -277,7 +289,7 @@ function check_kodibuild () {
 
 }
 
-# Funtion: REMOVE_KODI
+# Function: REMOVE_KODI
 function remove_kodi () {
 
 	if ! ${DISABLE_DELETE_PREFIX} ; then
@@ -295,7 +307,7 @@ function remove_kodi () {
 					MSG="${L_80} ${PREFIX}"
 					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 					loggy ${MSG}
-					loggy "${L_197}"
+					loggy "${L_80} ${PREFIX}"
 					${SUDO} rm -rf ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 				fi
 			fi
@@ -304,29 +316,28 @@ function remove_kodi () {
 
 }
 
-# Function: PREPARE_HACK_PRE
-function prepare_hack_pre () {
+# Function: PREPARE_HACK
+function prepare_hack () {
 
 	check_kodibuild
+	
+	builtin cd ${KODI}
 
-	# We copy the original file from backup before we sync with git
-	cp -f ${EXTRA_DIR}/SystemInfo.cpp.orig ${KODI}/xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
-	cp -f ${EXTRA_DIR}/SettingsSystemInfo.xml.orig ${KODI}/addons/skin.estuary/xml/SettingsSystemInfo.xml>> ${LOGGYLOGFILE}
+	# We make sure that our patched files are not present before we pull from git
+	# If this occurs, it may cause unexpected failures
+	rm -f xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
+	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
+	
+	rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
+	git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
 
 }
 
-# Function: PREPARE_HACK_POST
-function prepare_hack_post () {
-
-	check_kodibuild
-
-	# We make sure we have the latest version of the file in backup after a git pull
-	cp -f ${KODI}/xbmc/utils/SystemInfo.cpp ${EXTRA_DIR}/SystemInfo.cpp.orig >> ${LOGGYLOGFILE}
-	cp -f ${KODI}/addons/skin.estuary/xml/SettingsSystemInfo.xml ${EXTRA_DIR}/SettingsSystemInfo.xml.orig >> ${LOGGYLOGFILE}
-
-	builtin cd ${KODI}
+# Function: PATCH_KODI
+function patch_kodi () {
 
 	# We add my hack to enable a personalize System Information screen
+	builtin cd ${KODI}
 	patch -p0 < ${EXTRA_DIR}/kodi-add-kekePower-systeminfo.patch >> ${LOGGYLOGFILE}
 	patch -p0 < ${EXTRA_DIR}/add-kekePower-info.patch >> ${LOGGYLOGFILE}
 
@@ -389,8 +400,8 @@ function check_git_for_updates () {
 # Function: GIT_PULL
 function git_pull () {
 
-	# We have to run the prepare_hack_pre function now, before we git pull
-	prepare_hack_pre
+	# We have to run the prepare_hack function now, before we git pull
+	prepare_hack
 
 	if ! ${FRESH_INSTALL} ; then
 	if ! ${ONLY_ADDONS} ; then
@@ -444,8 +455,28 @@ function git_pull () {
 
 }
 
+# Function: CCACHE_NOT_FOUND
+function ccache_not_found () {
+
+	if [[ ! $( which ccache ) ]]; then
+		if [[ ${1} != "nomsg" ]]; then
+			MSG="${L_114}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+			loggy ${MSG}
+			MSG="${L_115}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+			loggy ${MSG}
+		fi
+		DISABLE_CCACHE_Q=true
+	fi
+
+}
+
 # Function: CLEAN_KODI
 function clean_kodi () {
+
+# Check if ccache is available, if not, disable the questions
+ccache_not_found nomsg
 
 # We check if we have a message from git_pull. If not, we continue the build
 if ! ${GITMSG} || ! ${ONLY_ADDONS} ; then
@@ -509,59 +540,11 @@ fi # End of the GITMSG check
 
 }
 
-# Function: CHECK_FOR_LIBS
-function check_for_libs () {
-
-	if [[ ! -f /usr/local/lib/libcrossguid.a ]] && [[ ! -f /usr/local/lib64/libcrossguid.a ]] && [[ ! -f /usr/lib/libcrossguid.a ]] && [[ ! -f /usr/lib64/libcrossguid.a ]]; then
-		builtin cd ${KODI}
-		${SUDO} make -C tools/depends/target/crossguid PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
-	fi
-	# We have to use libfmt provided by Kodi as the build will fail with others
-	if [[ ! -f /usr/local/lib/libfmt.a ]]; then
-		builtin cd ${KODI}
-		${SUDO} make -C tools/depends/target/libfmt PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
-	fi
-
-}
-
-# Function: CCACHE_NOT_FOUND
-function ccache_not_found () {
-
-	if [[ ! $( which ccache ) ]]; then
-		MSG="${L_114}"
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
-		loggy ${MSG}
-		MSG="${L_115}"
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
-		loggy ${MSG}
-fi
-
-}
-
-# Function: BUILD_JSON
-function build_json () {
-
-	if [[ ! -a /usr/local/bin/JsonSchemaBuilder ]]; then
-		${SUDO} make -C ${KODI}/tools/depends/native/JsonSchemaBuilder PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
-	fi
-
-}
-
-function kodi_downloads () {
-
-	builtin cd ${KODI}/kodi-build
-	tar xf ${EXTRA_DIR}/kodi-download.tar.xz
-
-}
-
 # Function: CONFIGURE_KODI
 function configure_kodi () {
 
 	# We apply my hack for personalized info
-	prepare_hack_post
-
-	# We check for needed libraries before we continue
-	check_for_libs
+	patch_kodi
 
 	if ${NOCCACHE_IS_SET} ; then
 		EXTRA_OPTIONS="-DENABLE_CCACHE:BOOL=OFF"
@@ -569,9 +552,6 @@ function configure_kodi () {
 
 	# We use this function here to print a message that ccache was not found
 	ccache_not_found
-
-	# We build the bundled JsonSchemaBuilder
-	build_json
 
 	# We try to find the Freetype2 include directory and add it to the configuration part
 	FIND_FREETYPE_INCLUDE=$( pkg-config --cflags --libs freetype2 | awk '{print $1}' | cut -dI -f2 )
@@ -588,6 +568,8 @@ function configure_kodi () {
 			# kodi_downloads
 
 			export ${CMAKE_FLAGS}
+			# I experienced that the compilation failed due to an empty file with the json-rpc version
+			# and that's why I added this hack.
 			json_rpc_ver="9.0.0"
 
 			echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
@@ -615,7 +597,7 @@ function configure_kodi () {
 # Function: CHECK_FOR_KODI_BIN
 function check_for_kodi_bin () {
 
-	if [[ ! -f $( builtin cd ${KODI}/kodi-build/; ls kodi* | grep -v xrandr ) ]]; then
+	if [[ ! -a ${KODI}/kodi-build/kodi-${XDG_SESSION_TYPE} ]]; then
 		MSG="${L_35} ${VERSION} ${L_36}"
 		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
@@ -625,6 +607,7 @@ function check_for_kodi_bin () {
 	fi
 
 }
+
 # Function: BUILD_KODI
 function build_kodi () {
 

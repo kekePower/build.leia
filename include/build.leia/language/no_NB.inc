@@ -81,13 +81,11 @@ L_119="Det vil også gjøre sitt til at Kodi blir bygget med de siste biblioteke
 L_120="Det gikk veldig bra. Du kan starte Kodi med denne kommandoen"
 L_121="Du kan se hele loggen i denne filen"
 
-L_130="git ble ikke funnet."
-L_131="RapidJSON ble ikke funnet."
-L_132="libfmt ble ikke funnet."
-L_133="Vennligst installer"
+L_130="ble ikke funnet."
+L_131="Vennligst installer git for din distribusjon."
+L_133="Kompilerer og installerer"
 
 L_190="Takk for at du bruker"
 L_191="til å bygge ${VERSION}"
 L_192="Husk å sjekke https://github.com/kekePower/build.leia"
 L_193="for oppdateringer og nyheter."
-L_197="Fjerner ${PREFIX}"

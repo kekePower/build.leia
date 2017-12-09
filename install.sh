@@ -4,14 +4,14 @@ echo "Do you want to install build.leia to ${HOME}/bin/? (Y/n) \c"
 read answer
 
 if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
-	
+
 	if [[ ! -d ${HOME}/bin ]]; then
 		echo "${HOME}/bin doesn't exist. Creating it now."
 		mkdir ${HOME}/bin
 	fi
 
 	echo "Copying files to ${HOME}/bin/"
-	cp -f build.leia ${HOME}/bin/
+	install -Dm 0750 build.leia ${HOME}/bin/build.leia
 
 	if [[ ! -d ${HOME}/bin/etc ]]; then
 		cp -af etc ${HOME}/bin/
@@ -19,11 +19,10 @@ if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 
 	if [[ $( cat ${HOME}/bin/etc/build.leia.conf | head -1 ) != $( cat etc/build.leia.conf.sample | head -1 ) ]]; then
 		echo "Please review ${HOME}/bin/etc/build.leia.conf.sample for changes and/or updates"
-		cp -f etc/build.leia.conf.sample ${HOME}/bin/etc/build.leia.conf.sample
+		install -Dm 0600 etc/build.leia.conf.sample ${HOME}/bin/etc/build.leia.conf.sample
 	fi
 
 	cp -af include ${HOME}/bin/
-	chmod 750 ${HOME}/bin/build.leia
 
 	echo "build.leia is installed."
 	echo "Please edit ${HOME}/bin/etc/build.leia.conf.sample before running the script."
@@ -32,12 +31,12 @@ if [[ ${answer} == "" || ${answer} == "Y" || ${answer} == "y" ]]; then
 	echo "\"Kodi <version> by kekePower\" in the System information screen."
 	echo "If ${HOME}/bin is not in your PATH, you will have to add it."
 	echo "Please run \"build.leia --help\" to see your options"
-	echo "Good luck!"
+	echo "Happy Compiling!"
 
 else
 
 	echo "I guess this isn't the right time for you."
 	echo "I understand."
-	echo "Please return if/when you're ready."
+	echo "Please return when you're ready to try build.leia."
 
 fi
