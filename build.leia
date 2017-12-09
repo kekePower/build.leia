@@ -162,7 +162,7 @@ if [[ ! -x $( which git ) ]]; then
 fi
 
 # Looking for RapidJSON
-if [[ ! $( pkg-config --cflags RapidJSON > /dev/null 2>&1 ) ]]; then
+if [[ ! $( pkg-config --cflags RapidJSON 2>&1 ) ]]; then
 	target="tools/depends/target"
 	not_found+=( rapidjson )
 fi
