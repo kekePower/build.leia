@@ -1,6 +1,6 @@
-# build.leia - A shell script to build Kodi 18 Leia from source
+## build.leia - A shell script to build Kodi 18 Leia from source
 
-## Description
+### Description
 This is a complete [hack](https://www.quora.com/What-is-the-true-definition-of-hacking) to fetch(clone), update(pull), compile and install [Kodi](https://github.com/xbmc/xbmc) from source on Linux.
 
 I wrote this script to automate the compilation of Kodi on my Linux system. It checks if you have the source, if you don't it will ask if you want to download it. Then it asks if you want to compile and install the binary-addons.
