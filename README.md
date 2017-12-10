@@ -63,7 +63,7 @@ There is a new option to use [Ninja](https://ninja-build.org/) to build Kodi for
 
 You have to check the differences in your current **build.leia.conf** towards the new one. There is a new entry called **USE_NINJA=true** or **false**. Set this to your preference.
 
-I've also added the possibility to optimise the build of Kodi for your CPU. See [this table](https://github.com/graysky2/kernel_gcc_patch/blob/master/README.md) and use **MY_CPU_ARCH=&gt;YourCPU&lt;**. The default is **native**, which normally is good enough.
+I've also added the possibility to optimise the build of Kodi for your CPU. See [this table](https://github.com/graysky2/kernel_gcc_patch/blob/master/README.md) and use **MY_CPU_ARCH=&lt;YourCPU&gt;**. The default is **native**, which normally is good enough.
 
 ### Command line options
 
