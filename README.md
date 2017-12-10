@@ -7,13 +7,13 @@ I wrote this script to automate the compilation of Kodi on my Linux system. It c
 
 Kodi 18 Leia uses cmake and checks for installled libraries automatically without the need to specify them during configuration. Compared to configuring Kodi Krypton v17, it's a lot easier and feels more bullet proof.
 
-Also, the introduction to using ccache speeds up build times after the first compilation. I've introduced an option that will disable ccache if you want to compile Kodi with a sort of clean slate (for a lack of words...).
+Also, the introduction to using ccache speeds up build times after the first compilation. I've introduced an option that will disable ccache if you want to compile Kodi with a sort of clean slate (for a lack of better words...).
 
 It uses the Z Shell (ZSH) as I find it more than capable for my needs.
 
 The script also uses **sudo** to install Kodi and the binary-addons. Please make sure you are in the **sudoers** list.
 
-Default installation dir is **/opt/leia**. This can be changed by editing the PREFIX variable in **build.leia**.
+Default installation dir is **/opt/leia**. This can be changed by editing the PREFIX variable in **etc/build.leia.conf**.
 
 See **build.leia --help** for your options.
 
@@ -27,13 +27,13 @@ See **build.leia --help** for your options.
 
 #### Optional
 * [Ninja](https://ninja-build.org/)
-	* It is now possible to use ninja to build Kodi Leia 18.0 with build.leia
+	* It is now possible to use ninja to build Kodi 18 Leia with build.leia
 
 ## Getting the source
 
 If you want to be on the cutting-edge, you can download the **master** branch. This will have a lot of bugs until the next major version is released.
 
-To get the latest, stable version, please use the **v1.x** branch.
+To get the latest, stable version, please use the **v1.x** branch. This is the main branch that I actively update as I, basically, have abandoned the master branch for now...
 
 **`git clone -b v1.x https://github.com/kekePower/build.leia`**
 
