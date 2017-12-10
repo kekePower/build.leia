@@ -318,10 +318,10 @@ function remove_kodi () {
 }
 
 # Function: PREPARE_HACK
-function prepare_hack () {  
+function prepare_hack () {
 
 	check_kodibuild
-	
+
 	builtin cd ${KODI}
 
 	# We make sure that our patched files are not present before we pull from git
@@ -330,7 +330,7 @@ function prepare_hack () {
 	echo "git checkout HEAD xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
 	rm -f xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
 	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
-	
+
 	echo "rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
 	echo "git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
 	rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
