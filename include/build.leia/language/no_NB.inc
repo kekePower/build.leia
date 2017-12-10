@@ -86,6 +86,6 @@ L_131="Vennligst installer git for din distribusjon."
 L_133="Kompilerer og installerer"
 
 L_190="Takk for at du bruker"
-L_191="til å bygge ${VERSION}"
+L_191="til å bygge Kodi."
 L_192="Husk å sjekke https://github.com/kekePower/build.leia"
 L_193="for oppdateringer og nyheter."

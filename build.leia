@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.7"
+SCRIPT_VERSION="1.6.8-pre"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -276,6 +276,7 @@ if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
 fi
 
 # Function: SEPARATOR_LINE
+# This one is here just to make the logging consistent
 function separator_line () {
 	echo "###################################################################" >> ${LOGGYLOGFILE} 2>&1
 }
@@ -317,7 +318,7 @@ function remove_kodi () {
 }
 
 # Function: PREPARE_HACK
-function prepare_hack () {
+function prepare_hack () {  
 
 	check_kodibuild
 	
@@ -325,9 +326,13 @@ function prepare_hack () {
 
 	# We make sure that our patched files are not present before we pull from git
 	# If this occurs, it may cause unexpected failures
+	echo "rm -f xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
+	echo "git checkout HEAD xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
 	rm -f xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
 	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
 	
+	echo "rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
+	echo "git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
 	rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
 	git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
 
@@ -779,11 +784,10 @@ echo "#             End of compilation for ${VERSION}                         #"
 separator_line
 echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}:${END}"
 echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi${END}"
-echo "${TIME}[$(date +%T)]${END} ${Y}${L_190} ${0:t} v${SCRIPT_VERSION} ${L_191}${END}"
-echo "${TIME}[$(date +%T)]${END} ${Y}${L_192}${END}"
-echo "${TIME}[$(date +%T)]${END} ${Y}${L_193}${END}"
 echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}:${END}"
 echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${LOGGYLOGFILE}${END}"
-
+echo "${TIME}[$(date +%T)]${END} ${W}${L_190} ${0:t} v${SCRIPT_VERSION} ${L_191}${END}"
+echo "${TIME}[$(date +%T)]${END} ${W}${L_192}${END}"
+echo "${TIME}[$(date +%T)]${END} ${W}${L_193}${END}"
 
 clean_exit ${0:t}

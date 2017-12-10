@@ -86,6 +86,6 @@ L_131="Please install git from your distro repository."
 L_133="Compiling and installing"
 
 L_190="Thanks for using"
-L_191="to build ${VERSION}"
+L_191="to build Kodi."
 L_192="Remember to check https://github.com/kekePower/build.leia"
 L_193="for updates and news."

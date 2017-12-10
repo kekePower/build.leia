@@ -86,6 +86,6 @@ L_131="Instalați git din depozitul dvs. distro."
 L_133="Compilarea și instalarea"
 
 L_190="Vă mulțumim că ați folosit"
-L_191="pentru a construi ${VERSION}"
+L_191="pentru a construi Kodi."
 L_192="Nu uitați să verificați https://github.com/kekePower/build.leia"
 L_193="pentru actualizări și știri."
