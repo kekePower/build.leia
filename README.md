@@ -121,18 +121,7 @@ So far, these are the supported languages:
 * Español Castellano (es_ES)
 * Română (ro_RO)
 
-## The road ahead
-
-I've a lot of thoughts about how to make this script even more robust. At the moment they're basically just a mess in my head, but I'll try to plot them down in a coherent way.
-
-* I'd like to see a way for the script to check for known dependencies
-	* If some are missing, download them (git?), compile and install them
-	* The main problem here is that we can't really catch missing dependecies of these unless we go through all of them manually and set up some sort of order
-* ~~Make the installer more robust when it comes to updating.~~
-	~~* Sometimes there are changes to the config file and I'd like to keep the local changes while updating with the new settings without adding in the REMOVEME string.~~
-* ~~Move the hardcoded text from build.leia into the language files~~
-* ~~Perhaps make an option (GLOBAL_INSTALL?) that en/disables the use of sudo~~
-* More to come...
+## The road ahead is made as I think of things to add/fix/modify/enhance/hack/break/fix again and so on!
 
 ## Extensions
 
