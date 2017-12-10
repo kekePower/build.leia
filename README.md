@@ -27,7 +27,7 @@ See **build.leia --help** for your options.
 
 #### Optional
 * [Ninja](https://ninja-build.org/)
-** It is now possible to use ninja to build Kodi Leia 18.0 with build.leia
+	* It is now possible to use ninja to build Kodi Leia 18.0 with build.leia
 
 ## Getting the source
 
