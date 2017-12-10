@@ -59,14 +59,11 @@ Or, if you edit build.leia.conf, your own string.
 
 ### You can now use Ninja and optimise the build for your CPU
 
-There is a new option to use [Ninja](https://ninja-build.org/) to build Kodi for you. The script will check if you have Ninja installed
-and if not, will fall back to using cmake. See [this PR](https://github.com/xbmc/xbmc/pull/12936).
+There is a new option to use [Ninja](https://ninja-build.org/) to build Kodi for you. The script will check if you have Ninja installed and if not, will fall back to using cmake. See [this PR](https://github.com/xbmc/xbmc/pull/12936).
 
-You have to check the differences in your current **build.leia.conf** towards the new one. There is a new entry called
-**USE_NINJA=true** or **false**. Set this to your preference.
+You have to check the differences in your current **build.leia.conf** towards the new one. There is a new entry called **USE_NINJA=true** or **false**. Set this to your preference.
 
-I've also added the possibility to optimise the build of Kodi for your CPU. See [the table](https://github.com/graysky2/kernel_gcc_patch/blob/master/README.md) on this page
-and use **MY_CPU_ARCH=<YourArch>**. The default is **native**, which normally is good enough.
+I've also added the possibility to optimise the build of Kodi for your CPU. See [this table](https://github.com/graysky2/kernel_gcc_patch/blob/master/README.md) and use **MY_CPU_ARCH=<YourCPU>**. The default is **native**, which normally is good enough.
 
 ### Command line options
 
@@ -142,9 +139,3 @@ I've a lot of thoughts about how to make this script even more robust. At the mo
 I've written two extension that are not included in the tar-ball.
 
 You can download them at [my gist page](https://gist.github.com/kekePower)
-
-## Screenshots
-
-![build.leia Help](https://dl.dropboxusercontent.com/u/15356427/build.leia.help.png)
-![build.leia Compile with progress](https://dl.dropboxusercontent.com/u/15356427/build.leia-progress.png)
-![build.leia Compile Finished](https://dl.dropboxusercontent.com/u/15356427/build.leia.finished.png)
