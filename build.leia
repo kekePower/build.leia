@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre"
+SCRIPT_VERSION="1.6.8-pre2"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -577,7 +577,7 @@ function configure_kodi () {
 			# and that's why I added this hack.
 			json_rpc_ver="9.0.0"
 
-			echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
+			echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DUSE_LTO=${NUMCPU} -DBUILD_TYPE=MinSizeRel -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
 			cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
 			separator_line
 		else
@@ -588,7 +588,7 @@ function configure_kodi () {
 				loggy ${MSG}
 				builtin cd ${KODI}/kodi-build
 				export ${CMAKE_FLAGS}
-				echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
+				echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DUSE_LTO=${NUMCPU} -DBUILD_TYPE=MinSizeRel -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
 				cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
 			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
 				MSG="${L_30} ${VERSION} ${L_39}"
@@ -629,7 +629,7 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 	export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
 	export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
 	export CPPFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4"
-	export MAKEFLAGS="-s -j${NUMCPU}"
+	# export MAKEFLAGS="-s -j${NUMCPU}"
 
 	if [[ ${SHOW_CMD} == "ninja" ]]; then
 		${WITH_BUILD_CMD} >> ${LOGGYLOGFILE} 2>&1 &
@@ -643,7 +643,7 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
 		done
 	else
-		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1 &
+		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s >> ${LOGGYLOGFILE} 2>&1 &
 		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
 				MSG=$( grep "^\[" ${LOGGYLOGFILE} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
