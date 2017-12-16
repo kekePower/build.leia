@@ -146,8 +146,6 @@ function ShowHelp () {
 		eval echo \$${help}
 	done
 
-	clean_exit ${1}
-
 }
 
 # These are all the defaults set to false
@@ -158,6 +156,9 @@ if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
 	clean_exit ${0:t}
 fi
+
+VERSION=Leia
+KODI=${KODIDIR}/${VERSION}
 
 # This is the pre-check section where we look for necessary binaries and libraries
 
@@ -215,9 +216,6 @@ done
 if [[ ${not_found[-1]} ]]; then
 	clean_exit ${0:t}
 fi
-
-VERSION=Leia
-KODI=${KODIDIR}/${VERSION}
 
 if ${USE_SUDO} ; then
 	SUDO=$( which sudo )
