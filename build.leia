@@ -563,6 +563,7 @@ function configure_kodi () {
 	ccache_not_found
 
 	# We try to find the Freetype2 include directory and add it to the configuration part
+	# The reason I've added this is because the build was failing for me
 	FIND_FREETYPE_INCLUDE=$( pkg-config --cflags --libs freetype2 | awk '{print $1}' | cut -dI -f2 )
 
 		if ${FRESH_INSTALL} ; then
@@ -573,10 +574,8 @@ function configure_kodi () {
 			check_kodibuild
 			builtin cd ${KODI}/kodi-build
 
-			# We add the tarballs that the installation automatically downloads
-			# kodi_downloads
-
 			export ${CMAKE_FLAGS}
+
 			# I experienced that the compilation failed due to an empty file with the json-rpc version
 			# and that's why I added this hack.
 			json_rpc_ver="9.0.0"
@@ -606,14 +605,16 @@ function configure_kodi () {
 # Function: CHECK_FOR_KODI_BIN
 function check_for_kodi_bin () {
 
-	if [[ ! -a ${KODI}/kodi-build/kodi-${XDG_SESSION_TYPE} ]]; then
-		MSG="${L_35} ${VERSION} ${L_36}"
-		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-		loggy ${MSG}
-		FAILED=true
-	else
-		FAILED=false
-	fi
+	KODI_BINARY=( kodi-x11 kodi-wayland kodi-gbm kodi.bin )
+
+	for binary in ${KODI_BINARY}
+	do
+		if [[ -a ${KODI}/kodi-build/${binary} ]]; then
+			FAILED=false
+		else
+			FAILED=true
+		fi
+	done
 
 }
 
@@ -633,7 +634,6 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 	export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
 	export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
 	export CPPFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4"
-	# export MAKEFLAGS="-s -j${NUMCPU}"
 
 	if [[ ${SHOW_CMD} == "ninja" ]]; then
 		${WITH_BUILD_CMD} >> ${LOGGYLOGFILE}.${SHOW_CMD} 2>&1 &
@@ -678,6 +678,9 @@ function install_kodi () {
 		fi
 		separator_line
 	elif ${FAILED} && ! ${ONLY_ADDONS} ; then
+		MSG="${L_35} ${VERSION} ${L_36}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
 		MSG="${L_110} ${VERSION} ${L_111} ${L_25}"
 		echo "${TIME}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
 		loggy ${MSG}
