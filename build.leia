@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre2"
+SCRIPT_VERSION="1.6.8-pre3"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -343,8 +343,8 @@ function patch_kodi () {
 
 	# We add my hack to enable a personalize System Information screen
 	builtin cd ${KODI}
-	patch -p0 < ${EXTRA_DIR}/kodi-add-kekePower-systeminfo.patch >> ${LOGGYLOGFILE}
-	patch -p0 < ${EXTRA_DIR}/add-kekePower-info.patch >> ${LOGGYLOGFILE}
+	patch -p0 < ${EXTRA_DIR}/kodi-add-kekePower-systeminfo.patch >> ${LOGGYLOGFILE}.patches
+	patch -p0 < ${EXTRA_DIR}/add-kekePower-info.patch >> ${LOGGYLOGFILE}.patches
 
 }
 
@@ -361,7 +361,7 @@ function fetch_kodi () {
 			MSG="${L_112} ${L_34}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			git clone -b master ${SOURCE} ${VERSION} >> ${LOGGYLOGFILE} 2>&1
+			git clone -b master ${SOURCE} ${VERSION} >> ${LOGGYLOGFILE}.gitclone 2>&1
 
 			# We need to set a variable here so that we know it's a fresh copy
 			FRESH_INSTALL=true
@@ -447,7 +447,7 @@ function git_pull () {
 			MSG="${L_21} ${VERSION} ${L_22}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			git pull >> ${LOGGYLOGFILE} 2>&1
+			git pull >> ${LOGGYLOGFILE}.gitpull 2>&1
 			GITMSG=false
 
 		fi
@@ -535,7 +535,7 @@ if ! ${GITMSG} || ! ${ONLY_ADDONS} ; then
 						MSG="${L_116}"
 						echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 						loggy ${MSG}
-						ccache -C >> ${LOGGYLOGFILE} 2>&1
+						ccache -C >> ${LOGGYLOGFILE}.cleanccache 2>&1
 					fi
 				fi
 			fi # End of no-ccache check
@@ -578,7 +578,7 @@ function configure_kodi () {
 			json_rpc_ver="9.0.0"
 
 			echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DUSE_LTO=${NUMCPU} -DBUILD_TYPE=MinSizeRel -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
-			cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
+			cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE}.configure 2>&1
 			separator_line
 		else
 			check_kodibuild
@@ -589,7 +589,7 @@ function configure_kodi () {
 				builtin cd ${KODI}/kodi-build
 				export ${CMAKE_FLAGS}
 				echo "cmake .. ${WITH_BUILD} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DUSE_LTO=${NUMCPU} -DBUILD_TYPE=MinSizeRel -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE} 2>&1
-				cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE} 2>&1
+				cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\" >> ${LOGGYLOGFILE}.configure 2>&1
 			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
 				MSG="${L_30} ${VERSION} ${L_39}"
 				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
@@ -632,10 +632,10 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 	# export MAKEFLAGS="-s -j${NUMCPU}"
 
 	if [[ ${SHOW_CMD} == "ninja" ]]; then
-		${WITH_BUILD_CMD} >> ${LOGGYLOGFILE} 2>&1 &
+		${WITH_BUILD_CMD} >> ${LOGGYLOGFILE}.${SHOW_CMD} 2>&1 &
 		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
-			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE} | tail -1 | grep -v "\\%" | awk '{print $1}' | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
+			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | tail -1 | grep -v "\\%" | awk '{print $1}' | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
 			if [[ ${#NUMBERS[2]} > 3 ]]; then
 				MSG=$(( ${NUMBERS[1]}*100/${NUMBERS[2]} ))
 				MSGa=$( echo ${MSG} | sed -e "s/\%//g" )
@@ -643,12 +643,12 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
 		done
 	else
-		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s >> ${LOGGYLOGFILE} 2>&1 &
+		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s >> ${LOGGYLOGFILE}.${SHOW_CMD} 2>&1 &
 		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
-				MSG=$( grep "^\[" ${LOGGYLOGFILE} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
-				MSGa=$( echo ${MSG} | sed -e "s/\%\%//g" )
-				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
+				MSG=$( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
+				msg=$( echo ${MSG} | sed -e "s/\%\%//g" -e "s/\%//g" )
+				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${msg}%${END}"\\r
 		done
 	fi
 
@@ -668,9 +668,9 @@ function install_kodi () {
 		loggy ${MSG}
 		builtin cd ${KODI}/kodi-build
 		if [[ ${SHOW_CMD} == "ninja" ]]; then
-			${SUDO} ${WITH_BUILD_CMD} install >> ${LOGGYLOGFILE} 2>&1
+			${SUDO} ${WITH_BUILD_CMD} install >> ${LOGGYLOGFILE}.${SHOW_CMD}.install 2>&1
 		else
-			${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+			${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE}.make.install 2>&1
 		fi
 		separator_line
 	elif ${FAILED} && ! ${ONLY_ADDONS} ; then
@@ -743,8 +743,8 @@ if ! ${FRESH_INSTALL} ; then
 			${SUDO} make -j${NUMCPU} -C \
 			tools/depends/target/binary-addons \
 			PREFIX=${PREFIX} \
-			>> ${LOGGYLOGFILE} 2>&1
-			NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE} | tail -1 | cut -d: -f2 ) )
+			>> ${LOGGYLOGFILE}.addons 2>&1
+			NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE}.addons | tail -1 | cut -d: -f2 ) )
 			if [[ ! ${NOTBUILT} == "" ]]; then
 				MSG="${L_94}"
 				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
