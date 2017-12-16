@@ -333,12 +333,12 @@ function prepare_hack () {
 	# If this occurs, it may cause unexpected failures
 	echo "rm -f xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
 	echo "git checkout HEAD xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
-	rm -f xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
+	rm -f xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE} 2>&1
 	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
 
 	echo "rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
 	echo "git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
-	rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
+	rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE} 2>&1
 	git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
 
 }
@@ -410,9 +410,6 @@ function check_git_for_updates () {
 # Function: GIT_PULL
 function git_pull () {
 
-	# We have to run the prepare_hack function now, before we git pull
-	prepare_hack
-
 	if ! ${FRESH_INSTALL} ; then
 	if ! ${ONLY_ADDONS} ; then
 
@@ -452,6 +449,8 @@ function git_pull () {
 			MSG="${L_21} ${VERSION} ${L_22}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
+			# We have to run the prepare_hack function now, before we git pull
+			prepare_hack
 			git pull >> ${LOGGYLOGFILE}.gitpull 2>&1
 			GITMSG=false
 
