@@ -20,9 +20,8 @@ fi
 
 fi # End of "fix" check
 
-# Function: CLEAN_EXIT
-# Usage: clean_exit ${0:t}
-function clean_exit () {
+# Function: FIND_TMP
+function find_temp () {
 
 	# TMP can be /tmp or /usr/tmp or ${HOME}/tmp
 	# Let's find it and use it
@@ -32,6 +31,14 @@ function clean_exit () {
 	else
 		TMPDIR=/tmp
 	fi
+
+}
+# Function: CLEAN_EXIT
+# Usage: clean_exit ${0:t}
+function clean_exit () {
+
+	# Find the right temp dir
+	find_temp
 
 	# We have to make sure that we get the name "build.leia"
 	local name
