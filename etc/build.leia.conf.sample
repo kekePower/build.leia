@@ -1,4 +1,4 @@
-# v8
+# v9
 # Configuration for build.leia
 
 # Define your own, personalized string to the System information screen
@@ -21,6 +21,8 @@ THEME=original
 
 # Edit this to install to another directory
 PREFIX="/opt/leia"
+# For Retroplayer
+# PREFIX=/opt/retroplayer
 
 # Set this variable to false if you don't want to install Kodi
 # globally. You will also have to edit the PREFIX above
@@ -39,6 +41,12 @@ CMAKE_FLAGS="CMAKE_PREFIX_PATH=/usr/local"
 # If you want to pull from a different source than the Kodi main
 # repository, you can set it here
 SOURCE=https://github.com/xbmc/xbmc
+BRANCH=master
+LOCAL_DIR=Leia
+# Uncomment the lines below for RetroPlayer
+# SOURCE=https://github.com/garbear/xbmc
+# BRANCH=retroplayer-18alpha1
+# LOCAL_DIR=Retroplayer
 
 INCLUDEDIR="${HOME}/bin/include"
 
