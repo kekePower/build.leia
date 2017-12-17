@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre4"
+SCRIPT_VERSION="1.6.8-pre8"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -333,13 +333,13 @@ function prepare_hack () {
 	# If this occurs, it may cause unexpected failures
 	echo "rm -f xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
 	echo "git checkout HEAD xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
-	rm -f xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE} 2>&1
-	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}
+	rm -f ${KODI}/xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE} 2>&1
+	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}.gitco 2>&1
 
 	echo "rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
 	echo "git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
-	rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE} 2>&1
-	git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}
+	rm -f ${KODI}/addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE} 2>&1
+	git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}.gitco 2>&1
 
 }
 
@@ -553,7 +553,9 @@ fi # End of the GITMSG check
 function configure_kodi () {
 
 	# We apply my hack for personalized info
-	patch_kodi
+	if ! ${NOGIT_IS_SET}; then
+		patch_kodi
+	fi
 
 	if ${NOCCACHE_IS_SET} ; then
 		EXTRA_OPTIONS="-DENABLE_CCACHE:BOOL=OFF"
@@ -613,16 +615,17 @@ function check_for_kodi_bin () {
 			found=${binary}
 			break
 		else
-			found=false
+			foundnothing=true
 		fi
 	done
 	
-	if ! ${found}; then
-		FAILED=true
-	else
+	if ${foundnothing}; then
 		FAILED=false
+	else
+		FAILED=true
 		MSG="${L_32} ${found}"
 		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
 	fi
 
 }
@@ -651,8 +654,8 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | tail -1 | grep -v "\\%" | awk '{print $1}' | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
 			if [[ ${#NUMBERS[2]} > 3 ]]; then
 				MSG=$(( ${NUMBERS[1]}*100/${NUMBERS[2]} ))
-				MSGa=$( echo ${MSG} | sed -e "s/\%//g" )
 			fi
+			MSGa=$( echo ${MSG} | sed -e "s/\%//g" )
 			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
 		done
 	else
@@ -660,8 +663,8 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
 				MSG=$( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
-				msg=$( echo ${MSG} | sed -e "s/\%\%//g" -e "s/\%//g" )
-				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${msg}%${END}"\\r
+				msga=$( echo ${MSG} | sed -e "s/\%//g" )
+				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${msga}%${END}"\\r
 		done
 	fi
 
