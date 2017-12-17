@@ -663,8 +663,8 @@ if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 		while pidof ${SHOW_CMD} > /dev/null 2>&1
 		do
 				MSG=$( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
-				msga=$( echo ${MSG} | sed -e "s/\%//g" -e "s/\%\%//g" -e "s/\%0//g" )
-				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${msga}%${END}"\\r
+				MSGa=$( echo ${MSG} | sed -e "s/\%//g" -e "s/\%\%//g" -e "s/\%0//g" )
+				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
 		done
 	fi
 
