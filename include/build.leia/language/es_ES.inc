@@ -33,6 +33,7 @@ L_25="Abortando!"
 
 L_30="Iniciando el proceso de compilación"
 L_31="Configurando"
+L_32="Encontré"
 L_33="Compilación"
 L_34="Por favor espere..."
 L_35="Construir de"

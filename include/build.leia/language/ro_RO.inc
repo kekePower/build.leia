@@ -33,6 +33,7 @@ L_25="Abandonarea!"
 
 L_30="Pornirea procesului de construire"
 L_31="Configurare"
+L_32="Am găsit"
 L_33="Compilare"
 L_34="Vă rugăm să așteptați..."
 L_35="Construieste"

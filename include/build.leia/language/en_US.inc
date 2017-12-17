@@ -33,6 +33,7 @@ L_25="Aborting!"
 
 L_30="Starting build process"
 L_31="Configuring"
+L_32="I found"
 L_33="Compiling"
 L_34="Please wait..."
 L_35="Build of"
