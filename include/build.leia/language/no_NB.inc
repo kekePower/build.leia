@@ -33,6 +33,7 @@ L_25="Avbryter!"
 
 L_30="Starter byggeprosess for"
 L_31="Konfigurerer"
+L_32="Jeg fant"
 L_33="Kompilerer"
 L_34="Vennligst vent..."
 L_35="Bygging av"

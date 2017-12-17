@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre3"
+SCRIPT_VERSION="1.6.8-pre4"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -605,16 +605,25 @@ function configure_kodi () {
 # Function: CHECK_FOR_KODI_BIN
 function check_for_kodi_bin () {
 
-	KODI_BINARY=( kodi-x11 kodi-wayland kodi-gbm kodi.bin )
+	KODI_BINARY=( kodi-x11 kodi.bin kodi-wayland kodi-gbm )
 
 	for binary in ${KODI_BINARY}
 	do
 		if [[ -a ${KODI}/kodi-build/${binary} ]]; then
-			FAILED=false
+			found=${binary}
+			break
 		else
-			FAILED=true
+			found=false
 		fi
 	done
+	
+	if ! ${found}; then
+		FAILED=true
+	else
+		FAILED=false
+		MSG="${L_32} ${found}"
+		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	fi
 
 }
 
