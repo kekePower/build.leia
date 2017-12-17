@@ -15,7 +15,7 @@
 +						<description>Vendor text label</description>
 +						<width>auto</width>
 +						<height>25</height>
-+						<label>Provided by kekePower</label>
++						<label>Compiled using build.leia</label>
 +						<font>font25_title</font>
 +						<textcolor>yellow</textcolor>
 +						<shadowcolor>black</shadowcolor>
