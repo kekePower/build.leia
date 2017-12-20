@@ -607,7 +607,7 @@ function configure_kodi () {
 # Function: CHECK_FOR_KODI_BIN
 function check_for_kodi_bin () {
 
-	KODI_BINARY=( kodi-x11 kodi.bin kodi-wayland kodi-gbm )
+	KODI_BINARY=( kodi.bin kodi-x11 kodi-wayland kodi-gbm )
 
 	for binary in ${KODI_BINARY}
 	do
