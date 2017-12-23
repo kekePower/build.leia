@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre12"
+SCRIPT_VERSION="1.6.8-pre13"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -366,7 +366,7 @@ function fetch_kodi () {
 			MSG="${L_112} ${L_34}"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			git clone -b ${BRANCH} ${SOURCE} ${VERSION} >> ${LOGGYLOGFILE}.gitclone 2>&1
+			git clone --depth 1 -b ${BRANCH} ${SOURCE} ${VERSION} >> ${LOGGYLOGFILE}.gitclone 2>&1
 
 			# We need to set a variable here so that we know it's a fresh copy
 			FRESH_INSTALL=true
