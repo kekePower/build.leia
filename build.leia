@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre14"
+SCRIPT_VERSION="1.6.8-pre15"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -580,7 +580,7 @@ function configure_kodi () {
 
 			# I experienced that the compilation failed due to an empty file with the json-rpc version
 			# and that's why I added this hack.
-			json_rpc_ver="9.0.0"
+			json_rpc_ver="9.1.0"
 
 			echo "cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DBUILD_TYPE=Release -DFFMPEG_PATH:BOOL="0" -DUSE_LTO:BOOL="1" -DENABLE_INTERNAL_FFMPEG:BOOL="1" -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE}.configure 2>&1
 			cmake .. \
