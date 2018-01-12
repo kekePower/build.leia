@@ -215,7 +215,6 @@ do
 	fi
 done
 #if [[ ${not_found[-1]} ]]; then
-#	echo "Just a premature exit..."
 #	clean_exit ${0:t}
 #fi
 
