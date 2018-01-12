@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8-pre15"
+SCRIPT_VERSION="1.6.8"
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -160,8 +160,9 @@ fi
 VERSION=${LOCAL_DIR}
 KODI=${KODIDIR}/${VERSION}
 
+# FUNCTION: precheck_for_kodi
+function precheck_for_kodi () {
 # This is the pre-check section where we look for necessary binaries and libraries
-
 # First off is Git
 typeset -a not_found
 if [[ ! -x $( which git ) ]]; then
@@ -213,9 +214,12 @@ do
 		loggy ${url}
 	fi
 done
-if [[ ${not_found[-1]} ]]; then
-	clean_exit ${0:t}
-fi
+#if [[ ${not_found[-1]} ]]; then
+#	echo "Just a premature exit..."
+#	clean_exit ${0:t}
+#fi
+
+}
 
 if ${USE_SUDO} ; then
 	SUDO=$( which sudo )
@@ -815,6 +819,7 @@ fi
 # Here we run all of our functions in turn
 fetch_kodi ${0:t}
 git_pull ${0:t}
+precheck_for_kodi ${0:t}
 clean_kodi ${0:t}
 remove_kodi ${0:t}
 configure_kodi ${0:t}
