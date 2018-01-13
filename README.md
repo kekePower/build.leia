@@ -31,11 +31,9 @@ See **build.leia --help** for your options.
 
 ## Getting the source
 
-If you want to be on the cutting-edge, you can download the **master** branch. This will have a lot of bugs until the next major version is released.
+If you want to be on the cutting-edge, you can download the **master** branch. There may be a lot of bugs until the next version is released.
 
-To get the latest, stable version, please use the **v1.x** branch. This is the main branch that I actively update as I, basically, have abandoned the master branch for now...
-
-**`git clone -b v1.x https://github.com/kekePower/build.leia`**
+**`git clone https://github.com/kekePower/build.leia`**
 
 ## Options
 
