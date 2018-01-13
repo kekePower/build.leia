@@ -1,17 +1,24 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.9-pre1"
+SCRIPT_VERSION="1.6.9-pre2"
 
 trap "interrupted ${0:t}" INT
 
-if [[ ! ${1} == "fix" ]]; then
+# TMP can be /tmp or /usr/tmp or ${HOME}/tmp
+# Let's find it and use it
+# If $TMP isn't set, we default to /tmp
+if [[ $( echo ${TMP} ) ]]; then
+	TMPDIR=${TMP}
+else
+	TMPDIR=/tmp
+fi
 
 # A simple check to see if you're already running this script.
 # It's not bullet proof, but it works.
-if [[ ! -f /tmp/.${0:t}.pid ]]; then
-	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
+if [[ ! -f ${TMPDIR}/.${0:t}.pid ]]; then
+	echo "$$" > ${TMPDIR}/.${0:t}.pid > /dev/null 2>&1
 else
-	if [[ $( echo $$ ) != $( cat /tmp/.${0:t}.pid ) ]]; then
+	if [[ $( echo $$ ) != $( cat ${TMPDIR}/.${0:t}.pid ) ]]; then
 		echo "You can't run two instances of this script at once!"
 		echo "If you have aborted the script, then you must remove /tmp/.${0:t}.pid"
 		echo "before you can continue."
@@ -20,28 +27,9 @@ else
 	fi
 fi
 
-fi # End of "fix" check
-
-# Function: FIND_TMP
-function find_temp () {
-
-	# TMP can be /tmp or /usr/tmp or ${HOME}/tmp
-	# Let's find it and use it
-	# If $TMP isn't set, we default to /tmp
-	if [[ $( echo ${TMP} ) ]]; then
-		TMPDIR=${TMP}
-	else
-		TMPDIR=/tmp
-	fi
-
-}
-
 # Function: CLEAN_EXIT
 # Usage: clean_exit ${0:t}
 function clean_exit () {
-
-	# Find the right temp dir
-	find_temp
 
 	# We have to make sure that we get the name "build.leia"
 	local name
@@ -59,12 +47,6 @@ function interrupted () {
 	echo "Caught an interrupt. Cleaning up!"
 	clean_exit ${1}
 }
-# "Undocumented" feature... :-)
-# Because I'm too lazy to type the delete command while testing
-if [[ ${1} == "fix" ]]; then
-	echo "Deleting the pid file from ${TMPDIR}"
-	clean_exit ${0:t}
-fi
 
 if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
 	echo "Please edit the configuration file located at"
