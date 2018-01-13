@@ -1,6 +1,8 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.8"
+SCRIPT_VERSION="1.6.9-pre1"
+
+trap "interrupted ${0:t}" INT
 
 if [[ ! ${1} == "fix" ]]; then
 
@@ -33,6 +35,7 @@ function find_temp () {
 	fi
 
 }
+
 # Function: CLEAN_EXIT
 # Usage: clean_exit ${0:t}
 function clean_exit () {
@@ -52,6 +55,10 @@ function clean_exit () {
 
 }
 
+function interrupted () {
+	echo "Caught an interrupt. Cleaning up!"
+	clean_exit ${1}
+}
 # "Undocumented" feature... :-)
 # Because I'm too lazy to type the delete command while testing
 if [[ ${1} == "fix" ]]; then
