@@ -20,8 +20,7 @@ if [[ ! -f ${TMPDIR}/.${0:t}.pid ]]; then
 else
 	if [[ $( echo $$ ) != $( cat ${TMPDIR}/.${0:t}.pid ) ]]; then
 		echo "You can't run two instances of this script at once!"
-		echo "If you have aborted the script, then you must remove /tmp/.${0:t}.pid"
-		echo "before you can continue."
+		echo "The other running instance has PID: $( cat ${TMPDIR}/.${0:t}.pid )"
 		echo "Exiting."
 		exit
 	fi
