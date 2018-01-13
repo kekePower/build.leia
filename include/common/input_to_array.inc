@@ -5,7 +5,7 @@
 function InputToArray () {
 
 	if [[ ${@} =~ "--with" ]]; then
-	        InputArray=( $( echo ${@} | cut -d= -f2 | sed 's/\,/\ /g' ) )
+		InputArray=( $( echo ${@} | cut -d= -f2 | sed -e 's/\,/\ /g' ) )
 	fi
 
 }

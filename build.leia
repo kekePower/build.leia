@@ -1,33 +1,111 @@
-#!/bin/zsh
+#!/bin/env zsh
 
-SCRIPT_VERSION="1.99.1-alpha"
+SCRIPT_VERSION="1.6.9-pre1"
 
-if [[ $( grep REMOVEME ${0:a:h}/etc/${0:t}.conf ) ]]; then
-    echo "Please edit the configuration file located at"
-    echo "${0:a:h}/etc/${0:t}.conf"
-    echo "Script aborted."
-    exit
+trap "interrupted ${0:t}" INT
+
+if [[ ! ${1} == "fix" ]]; then
+
+# A simple check to see if you're already running this script.
+# It's not bullet proof, but it works.
+if [[ ! -f /tmp/.${0:t}.pid ]]; then
+	echo "$$" > /tmp/.${0:t}.pid > /dev/null 2>&1
+else
+	if [[ $( echo $$ ) != $( cat /tmp/.${0:t}.pid ) ]]; then
+		echo "You can't run two instances of this script at once!"
+		echo "If you have aborted the script, then you must remove /tmp/.${0:t}.pid"
+		echo "before you can continue."
+		echo "Exiting."
+		exit
+	fi
 fi
 
-# We load the configuration file
-. ${0:a:h}/etc/${0:t}.conf
+fi # End of "fix" check
+
+# Function: FIND_TMP
+function find_temp () {
+
+	# TMP can be /tmp or /usr/tmp or ${HOME}/tmp
+	# Let's find it and use it
+	# If $TMP isn't set, we default to /tmp
+	if [[ $( echo ${TMP} ) ]]; then
+		TMPDIR=${TMP}
+	else
+		TMPDIR=/tmp
+	fi
+
+}
+
+# Function: CLEAN_EXIT
+# Usage: clean_exit ${0:t}
+function clean_exit () {
+
+	# Find the right temp dir
+	find_temp
+
+	# We have to make sure that we get the name "build.leia"
+	local name
+	name=$( echo ${1} | cut -d\/ -f1 )
+
+	# We remove the pid file
+	rm -f ${TMPDIR}/.${name}.pid > /dev/null 2>&1
+
+	# Then we exit
+	exit 0
+
+}
+
+function interrupted () {
+	echo "Caught an interrupt. Cleaning up!"
+	clean_exit ${1}
+}
+# "Undocumented" feature... :-)
+# Because I'm too lazy to type the delete command while testing
+if [[ ${1} == "fix" ]]; then
+	echo "Deleting the pid file from ${TMPDIR}"
+	clean_exit ${0:t}
+fi
+
+if [[ ! -f ${0:a:h}/etc/${0:t}.conf ]]; then
+	echo "Please edit the configuration file located at"
+	echo "${0:a:h}/etc/${0:t}.conf.sample"
+	echo "and rename it to ${0:t}.conf"
+	echo "Script aborted."
+	clean_exit ${0:t}
+fi
 
 # This function is used to include common sets of files used
-# Edit the path to reflect your installation
+#        Function    $1       $2
+# Usage: include some/thing ${0:t}
 function include () {
-  INC_FILE=${INCLUDEDIR}/${1}.inc
-	if [[ ! -f ${INC_FILE} ]]; then
-		INC_OPT=$( echo ${1} | cut -d\/ -f2 )
-		echo "Supplied option \"${INC_OPT}\" is not valid."
-		echo "Ignoring"
+
+	# Edit this path to reflect your installation
+	local inc_file
+  inc_file=${HOME}/bin/include/${1}.inc
+	if [[ ! -f ${inc_file} ]]; then
+		local inc_opt
+		inc_opt=$( echo ${1} | cut -d\/ -f2 )
+		echo "Supplied option \"${inc_opt}\" is not valid."
+		echo "Not critical. Will continue and use the default \"--with=clean,addons\"."
 	else
-		. ${INC_FILE}
+		builtin source ${inc_file} ${2}
 	fi
+
 }
 
 include common/colors
 include common/numcpu
 include common/input_to_array
+
+# We load the configuration file
+# It has to be sourced after "colors" are added since it uses some of
+# those variables
+builtin source ${0:a:h}/etc/${0:t}.conf
+
+EXTRA_DIR="${INCLUDEDIR}/patches"
+
+# Include the theme file specified in configuration
+include themes/${THEME:l}
 
 # Function: LOGGER
 # This has to be included after the config file as this contains the path to
@@ -49,82 +127,154 @@ elif [[ -f ${INCLUDEDIR}/${0:t}/language/${SysLang}.inc ]]; then
     include ${0:t}/language/${SysLang} ${0:t}
     NOLANG=${MyLANG}
 else
-    echo "\n${RED}Could not find a language file for your system language (${NOLANG}).${END}"
-    echo "${WHITE}Would you like to continue with English (en_US)? (Y/n)${END} \c"
+    echo "\n${WARNING}Could not find a language file for your system language (${NOLANG}).${END}"
+    echo "${W}Would you like to continue with English (en_US)? (Y/n)${END} \c"
     read LangAnswer
     if [[ ( ${LangAnswer} == "" || ${LangAnswer} == "Y" || ${LangAnswer} == "y" ) ]]; then
-        include ${0:t}/language/en_US ${0:t}
+			include ${0:t}/language/en_US ${0:t}
     else
-        echo "\n${YELLOW}You decided not to continue. Sorry about that!${END}"
-        echo "${WHITE}Please consider translating this script to your language.${END}"
-        echo "${WHITE}The language files can be found at"
-        echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
-        exit
+      echo "\n${Y}You decided not to continue. Sorry about that!${END}"
+      echo "${W}Please consider translating this script to your language.${END}"
+      echo "${W}The language files can be found at"
+      echo "${INCLUDEDIR}/${0:t}/language/${END}.\n"
+			clean_exit ${0:t}
     fi
 fi
 
+# Function: SHOWHELP
+# Usage: ShowHelp ${0:t}
 function ShowHelp () {
-	# Usage: ShowHelp ${0:t}
-    for i in {10..29}
-    do
-        help=Help_${i}
-        eval echo \$${help}
-    done
-	exit
+
+	# When you change the order in the language file, you must also update
+	# the number range here.
+	for i in {10..30}
+	do
+		help=Help_${i}
+		eval echo \$${help}
+	done
+
 }
 
-# We set all the variables used to false
-ADDONS_IS_SET=false
-CLEAN_IS_SET=false
-DIRTY_IS_SET=false
-FORCE_IS_SET=false
-NOGIT_IS_SET=false
-FRESH_INSTALL=false
+# These are all the defaults set to false
+include ${0:t}/defaults
 
 # Show the help information and exit
 if [[ ${1} == "--help" ]]; then
 	ShowHelp ${0:t}
-	exit
+	clean_exit ${0:t}
 fi
 
-VKODI=Leia
+VERSION=${LOCAL_DIR}
+KODI=${KODIDIR}/${VERSION}
 
-# Edit this to install to another directory
-PREFIX="/opt/${VKODI:l}"
-#
+# FUNCTION: precheck_for_kodi
+function precheck_for_kodi () {
+# This is the pre-check section where we look for necessary binaries and libraries
+# First off is Git
+typeset -a not_found
+if [[ ! -x $( which git ) ]]; then
+	git_url="https://git-scm.org/"
+	not_found=( git )
+fi
 
-KODI=${KODIDIR}/${VKODI}
-ARROW="${W}-${END}${INFO}>${END}"
+# Looking for RapidJSON
+if [[ ! $( pkg-config --cflags RapidJSON 2>&1 ) ]]; then
+	target="tools/depends/target"
+	not_found+=( rapidjson )
+fi
 
-MSG="Welcome to ${0:t} v${SCRIPT_VERSION}"
-echo "${WHITE}[$(date +%T)]${END} ${W}${MSG}${END}"
+# Now we look for libfmt in /usr/lib and /usr/local/lib
+if [[ ! -a /usr/lib/libfmt.a && ! -a /usr/lib64/libfmt.a && ! -a /usr/local/lib/libfmt.a && ! -a /usr/local/lib64/libfmt.a ]]; then
+	target="tools/depends/target"
+	not_found+=( libfmt )
+fi
+
+# Looking for crossguid
+if [[ ! -f /usr/local/lib/libcrossguid.a ]] && [[ ! -f /usr/local/lib64/libcrossguid.a ]] && [[ ! -f /usr/lib/libcrossguid.a ]] && [[ ! -f /usr/lib64/libcrossguid.a ]]; then
+	target="tools/depends/target"
+	not_found+=( crossguid )
+fi
+
+# Looking for JsonSchemaBuilder
+if [[ ! -a /usr/local/bin/JsonSchemaBuilder ]]; then
+	target="tools/depends/native"
+	not_found+=( JsonSchemaBuilder )
+fi
+
+for nf in ${not_found}
+do
+	if [[ ${nf} == "git" ]]; then
+		msg="${L_131}"
+	else
+		msg="${nf} ${L_130}"
+	fi
+	echo "${TIME}[$(date +%T)]${END} ${WARNING}${msg}${END}"
+	loggy ${msg}
+	msg="${L_133} ${nf}"
+	echo "${TIME}[$(date +%T)]${END} ${YELLOW}${msg}${END}"
+	loggy ${msg}
+	builtin cd ${KODI}
+	${SUDO} make -C ${target}/${nf} PREFIX=/usr/local >> ${LOGGYLOGFILE} 2>&1
+	url="$( eval echo \$${nf}_url )"
+	if [[ ${url} ]]; then
+		echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${url}${END}"
+		loggy ${url}
+	fi
+done
+#if [[ ${not_found[-1]} ]]; then
+#	clean_exit ${0:t}
+#fi
+
+}
+
+if ${USE_SUDO} ; then
+	SUDO=$( which sudo )
+fi
+
+if ${USE_NINJA}; then
+		include ${0:t}/ninja
+else
+	WITH_BUILD_CMD=$( which cmake )
+	SHOW_CMD="cmake"
+fi
+
+MSG="${L_10} ${0:t} v${SCRIPT_VERSION}"
+echo "${TIME}[$(date +%T)]${END} ${W}${MSG}${END}"
 loggy ${MSG}
 
 # The default behavior is to do a clean,addons install
 # Same as build.leia --with=clean,addons
-if [[ ! ${@} ]]; then
+if [[ ! ${@} || ${@} == "" ]] ; then
+
 	MSG="${L_100} --with=clean,addons"
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 	loggy ${MSG}
 	include ${0:t}/clean
 	include ${0:t}/addons
-elif [[ ${@} =~ "--with" ]]; then
 
-  # Initialze the array in the function InputToArray before use
-  # Options are: --with=clean,dirty,addons,no-git,force
-  InputToArray ${@}
-  for i in ${InputArray}
-  do
-    include ${0:t}/${i}
-  done
+fi
 
-  # We default to doing a dirty install if not --with=clean is set and if --with=dirty is not set
-  # This will decrease build times
-	if ! ${CLEAN_IS_SET} || ! ${DIRTY_IS_SET} ; then
-		MSG="${L_100} --with=dirty"
-		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+if [[ ${@} =~ "--with" ]]; then
+
+	# Initialze the array in the function InputToArray before use
+	# Options are: --with=clean,dirty,addons,no-git,force,only-addons,nn
+	InputToArray ${@}
+	for i in ${InputArray}
+	do
+		include ${0:t}/${i}
+		if ${STANDALONE} ; then
+			break
+		fi
+	done
+
+	# We default to doing a clean install if these variables are false
+	if ( ! ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ) && ! ${ONLY_ADDONS} ; then
+		MSG="${L_100} --with=clean"
+		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 		loggy ${MSG}
-		include ${0:t}/dirty
+		include ${0:t}/clean
+	elif ${ONLY_ADDONS} ; then
+		NOGIT_IS_SET=true
 	fi
 
 fi
@@ -132,260 +282,385 @@ fi
 # We check to see if clean and dirty are set at the same time.
 # This is not wanted and the script will exit if found.
 if ${CLEAN_IS_SET} && ${DIRTY_IS_SET} ; then
-	echo "${W}**${END} ${RED}${L_101}${END} ${W}**${END}"
-	echo "${W}**${END} ${RED}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
-	echo "${W}**${END} ${RED}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
-	exit
+
+	echo "${W}**${END} ${WARNING}${L_101}${END} ${W}**${END}"
+	echo "${W}**${END} ${WARNING}${L_102} \"${0:t} --help\" ${L_103}${END} \t${W}**${END}"
+	echo "${W}**${END} ${WARNING}${L_25}${END} \t\t\t\t\t\t\t${W}**${END}"
+	clean_exit ${0:t}
+
 fi
 
-# Function: DETECT_LINUX_DIST
-function detect_linux_dist () {
+# Function: SEPARATOR_LINE
+# This one is here just to make the logging consistent
+function separator_line () {
+	echo "###################################################################" >> ${LOGGYLOGFILE} 2>&1
+}
 
-	if [[ $( which lsb_release ) ]]; then
-		DIST_NAME=$( lsb_release -i | cut -d: -f2 )
-		DIST_NAME=${DIST_NAME//[[:space:]]/}
-		set -- ${DIST_NAME}
-		DIST_NAME=$*
-		DIST_NAME=${DIST_NAME:l}
+# Function: CHECK_KODIBULD
+function check_kodibuild () {
 
-		echo ${DIST_NAME}
-
-		if [[ -f ${INCLUDEDIR}/depends/dist/${DIST_NAME}.inc ]]; then
-			# include depends/dist/${DIST_NAME}
-			cat ${INCLUDEDIR}/depends/dist/${DIST_NAME}.inc
-		else
-			echo "Could not find configuration for ${DIST_NAME}"
-		fi
-		exit
+	if [[ ! -d ${KODI}/build ]]; then
+		mkdir ${KODI}/build > /dev/null 2>&1
 	fi
-
 
 }
 
-# This will check if ccache is installed
-# If it isn't, it will ask if you want to download from source, build and install it
-# Since we're building Kodi v18 Leia, we're also using the latest ccache from Github
-function build_ccache () {
+# Function: REMOVE_KODI
+function remove_kodi () {
 
-	if [[ ! $( which ccache ) ]]; then
-		MSG="${L_114}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
-		loggy ${MSG}
-		MSG="${L_115}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
-		loggy ${MSG}
-		MSG="Do you wish to download and install ccache from source? ${L_81} \c"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
-		read installccache
-		
-		if [[ ${installccache} == "" || ${installccache} == "${L_82}" || ${installccache} == "${L_83}" ]]; then
-			
-			# First we load the config information
-			include depends/ccache
-			
-			#Then we check if the depends directory exists, create it if not
-			if [[ ! -d ${KODIDIR}/depends ]]; then
-				mkdir ${KODIDIR}/depends
-			else
-				if [[ ! -d ${KODIDIR}/depends/${APP} ]]; then
-					MSG="Fetching the ${APP} source from ${SOURCE}"
-					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
+	if ! ${DISABLE_DELETE_PREFIX} ; then
+		if ! ${ONLY_ADDONS} ; then
+			if [[ -d ${PREFIX} ]]; then
+
+				MSG="${L_98}"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+				loggy ${MSG}
+				MSG="${L_97} ${L_81}${END}${Y} \c"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+				read removekodi
+
+				if [[ ${removekodi} == "" || ${removekodi} == "${L_82}" || ${removekodi} == "${L_83}" ]]; then
+					MSG="${L_80} ${PREFIX}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 					loggy ${MSG}
-					builtin cd ${KODIDIR}/depends
-					git clone -b master ${SOURCE} ${APP} >> ${LOGGYLOGFILE} 2>&1
-					
-					MSG="Compiling and installing ${APP}"
-					builtin cd ${KODIDIR}/depends/${APP}
-					${PRERUN} >> ${LOGGYLOGFILE} 2>&1
-					if [[ -f ${CONFIGURE} ]]; then
-						${CONFIGURE} --prefix=${APP_PREFIX} >> ${LOGGYLOGFILE} 2>&1
-					else
-						MSG="Something failed. Please check the log file: ${LOGGYLOGFILE}"
-						echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
-					fi
-					make -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
-					sudo make -s -j${NUMCPU} install >> ${LOGGYLOGFILE} 2>&1
-					
-					builtin cd ${HOME}
-					if [[ $( which ccache ) ]]; then
-						MSG="${APP} successfully installed and ready to use."
-						echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END}"
-					else
-						MSG="${APP} was not installed. Check the logfile."
-						echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
-					fi
+					loggy "${L_80} ${PREFIX}"
+					${SUDO} rm -rf ${PREFIX} >> ${LOGGYLOGFILE} 2>&1
 				fi
 			fi
-		else
-			MSG="You chose not to install ${APP}."
-			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
 		fi
 	fi
-	
+
+}
+
+# Function: PREPARE_HACK
+function prepare_hack () {
+
+	check_kodibuild
+
+	builtin cd ${KODI}
+
+	# We make sure that our patched files are not present before we pull from git
+	# If this occurs, it may cause unexpected failures
+	echo "rm -f xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
+	echo "git checkout HEAD xbmc/utils/SystemInfo.cpp" >> ${LOGGYLOGFILE}
+	rm -f ${KODI}/xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE} 2>&1
+	git checkout HEAD xbmc/utils/SystemInfo.cpp >> ${LOGGYLOGFILE}.gitco 2>&1
+
+	echo "rm -f addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
+	echo "git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml" >> ${LOGGYLOGFILE}
+	rm -f ${KODI}/addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE} 2>&1
+	git checkout HEAD addons/skin.estuary/xml/SettingsSystemInfo.xml >> ${LOGGYLOGFILE}.gitco 2>&1
+
+}
+
+# Function: PATCH_KODI
+function patch_kodi () {
+
+	# We add my hack to enable a personalize System Information screen
+	builtin cd ${KODI}
+	patch -p0 < ${EXTRA_DIR}/kodi-add-kekePower-systeminfo.patch >> ${LOGGYLOGFILE}.patches
+	patch -p0 < ${EXTRA_DIR}/add-kekePower-info.patch >> ${LOGGYLOGFILE}.patches
+
 }
 
 # Function: FETCH_KODI
 function fetch_kodi () {
+
 	if [[ ! -d ${KODI} ]]; then
 		MSG="${L_104} ${L_81}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END} \c"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG} \c${END}"
 		read answer
-		
+
 		if [[ ${answer} == "" || ${answer} == "${L_82}" || ${answer} == "${L_83}" ]]; then
 			builtin cd ${KODIDIR} > /dev/null 2>&1
-			MSG=${L_112}
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			MSG="${L_112} ${L_34}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
-			git clone -b master https://github.com/xbmc/xbmc ${VKODI} >> ${LOGGYLOGFILE} 2>&1
-			
+			git clone --depth 1 -b ${BRANCH} ${SOURCE} ${VERSION} >> ${LOGGYLOGFILE}.gitclone 2>&1
+
 			# We need to set a variable here so that we know it's a fresh copy
 			FRESH_INSTALL=true
-			
+
 			MSG="${L_105} ${L_81}"
-			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${MSG}${END} \c"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG} \c${END}"
 			read binaryaddons
-			
+
 			if [[ ${binaryaddons} == "" || ${binaryaddons} == "${L_82}" || ${binaryaddons} == "${L_83}" ]]; then
-				ADDONS_IS_SET=true
+				FRESH_ADDON_IS_SET=true
+				FRESH_INSTALL=true
 			else
 				MSG="${L_106}"
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
-				ADDONS_IS_SET=false
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+				ADDON_IS_SET=false
+				FRESH_INSTALL=true
 			fi
 		else
-			echo "\n ${ARROW} ${YELLOW}${L_107} ${KODI}${END}"
-			echo "${ARROW} ${YELLOW}git clone https://github.com/xbmc/xbmc ${VKODI}${END}"
-			echo "${ARROW} ${WARNING}${L_25}${END}"
-			exit
+			MSG="${L_107}"
+			echo "\n ${ARROW} ${Y}${MSG} ${KODI}${END}"
+			echo "${ARROW} ${Y}git clone ${SOURCE} ${VERSION}${END}"
+			MSG="${L_25}"
+			echo "${ARROW} ${WARNING}${MSG}${END}"
+			clean_exit ${1}
 		fi
 	fi
+
+}
+
+# Function: CHECK_GIT_FOR_UPDATES
+function check_git_for_updates () {
+
+	if [[ $( git rev-parse HEAD ) == $( git ls-remote $( git rev-parse --abbrev-ref @{u} | sed 's/\// /g' ) | cut -f1 ) ]]; then
+		UPTODATE=true
+	else
+		UPTODATE=false
+	fi
+
 }
 
 # Function: GIT_PULL
 function git_pull () {
-if ! ${FRESH_INSTALL} ; then
-	
-  if ${FORCE_IS_SET} ; then
-      local YesForce
-      YesForce=" (${L_24})"
-  fi
-	
-	MSG="${L_20} ${VKODI}${YesForce}"
-	echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-	loggy ${MSG}
-    
-  if ! ${NOGIT_IS_SET} ; then
-		MSG="${L_21} ${VKODI} ${L_22}"
-		echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		loggy ${MSG}
 
-		builtin cd ${KODI}/kodi-build
-	  git pull > /tmp/build.leia.gitpull 2>&1
-  
-	    if [[ $( grep "Already up-to-date" /tmp/build.leia.gitpull ) ]]; then
-				if ${FORCE_IS_SET} ; then
-					FORCED="${L_24}"
-				else
-					FORCED="${L_25}"
-				fi
-	
-		    MSG="${VKODI} ${L_23} ${FORCED}"
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-				loggy ${MSG}
-				GITMSG="${VKODI} ${L_108}"
-  
-				if ! ${FORCE_IS_SET} ; then
-		      GITMSG="${VKODI} ${L_109}"
-					exit
-				fi
+	if ! ${FRESH_INSTALL} ; then
+	if ! ${ONLY_ADDONS} ; then
+
+  if ${FORCE_IS_SET} ; then
+		FORCED="${L_24}"
+		GITMSG=false
+	else
+		FORCED="${L_25}"
+		GITMSG=true
+  fi
+
+  if ! ${NOGIT_IS_SET} ; then
+
+		# We check if build exists, if not, create it.
+		check_kodibuild
+
+		MSG="${L_20} ${VERSION}${YesForce}"
+		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
+		builtin cd ${KODI}/build
+
+		check_git_for_updates
+
+		separator_line
+
+		if ${UPTODATE} ; then
+
+			MSG="${VERSION} ${L_23} ${FORCED}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+			loggy ${MSG}
+			if ${GITMSG} ; then
+				clean_exit ${1}
 			fi
+
+		else
+
+			MSG="${L_21} ${VERSION} ${L_22}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			loggy ${MSG}
+			# We have to run the prepare_hack function now, before we git pull
+			prepare_hack
+			git pull >> ${LOGGYLOGFILE}.gitpull 2>&1
+			GITMSG=false
+
+		fi
+	else
+		GITMSG=false
 	fi
 
-	# Removing the temp git pull file
-	loggy "##############################################################"
-	cat /tmp/build.leia.gitpull >> ${LOGGYLOGFILE} > /dev/null 2>&1
-	rm -f /tmp/build.leia.gitpull > /dev/null 2>&1
+	fi
+	fi
 
-fi
+}
+
+# Function: CCACHE_NOT_FOUND
+function ccache_not_found () {
+
+	if [[ ! $( which ccache ) ]]; then
+		if [[ ${1} != "nomsg" ]]; then
+			MSG="${L_114}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+			loggy ${MSG}
+			MSG="${L_115}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+			loggy ${MSG}
+		fi
+		DISABLE_CCACHE_Q=true
+	fi
+
 }
 
 # Function: CLEAN_KODI
 function clean_kodi () {
 
+# Check if ccache is available, if not, disable the questions
+ccache_not_found nomsg
+
 # We check if we have a message from git_pull. If not, we continue the build
-if [[ ! ${GITMSG} ]]; then
-  
+if ! ${GITMSG} || ! ${ONLY_ADDONS} ; then
+
 	if ! ${FRESH_INSTALL} ; then
 		if ${CLEAN_IS_SET} ; then
 			MSG="${L_113}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
+
+			# We check if build exists, if not, we create it.
+			# It is done at this point as well since this is a point where
+			# something could go wrong sometimes. I.e. if you Ctrl-C the script
+			# at this point and build is missing.
+			check_kodibuild
 			builtin cd ${KODI}
-			rm -rf kodi-build > /dev/null 2>&1
-			mkdir kodi-build > /dev/null 2>&1
-			if [[ $( which ccache ) ]]; then
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_119}${END}"
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_117} ${L_81}${END} \c"
-				read emptyccache
-				if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
-					MSG="${L_116}"
-					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
-					loggy ${MSG}
-					ccache -C >> ${LOGGYLOGFILE} 2>&1
+			${SUDO} rm -rf build > /dev/null 2>&1
+
+		if ! ${DISABLE_CCACHE_Q} ; then
+
+			if ! ${NOCCACHE_IS_SET} ; then
+				if [[ $( which ccache ) ]]; then
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_118}${END}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_119}${END}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${L_117} ${L_81} \c${END}"
+					read emptyccache
+					if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
+						MSG="${L_116}"
+						echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+						loggy ${MSG}
+						ccache -C >> ${LOGGYLOGFILE} 2>&1
+					fi
 				fi
-			fi
-		elif ${DIRTY_IS_SET} ; then
-			builtin cd ${KODI}/kodi-build
-		fi
+			fi # End of check for no-ccache check
+
+		fi # End of DISABLE_CCACHE_Q from nn.inc
+
+	fi # End of clean check
 	else
-		if [[ $( which ccache ) ]]; then
-			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_118}${END}"
-      echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_119}${END}"
-			echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${YELLOW}${L_117} ${L_81}${END} \c"
-			read emptyccache
-			if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
-				MSG="${L_116}"
-				echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
-				loggy ${MSG}
-				ccache -C >> ${LOGGYLOGFILE} 2>&1
-			fi
-		fi
+		if ! ${DISABLE_CCACHE_Q} ; then
+			if ! ${CCACHE_IS_SET} ; then
+				if [[ $( which ccache ) ]]; then
+					MSG="${L_118}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+					MSG="${L_119}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${END}"
+					MSG="${L_117} ${L_81}}"
+					echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${MSG}${W} \c${END}"
+					read emptyccache
+					if [[ ${emptyccache} == "" || ${emptyccache} == "${L_82}" || ${emptyccache} == "${L_83}" ]]; then
+						MSG="${L_116}"
+						echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
+						loggy ${MSG}
+						ccache -C >> ${LOGGYLOGFILE}.cleanccache 2>&1
+					fi
+				fi
+			fi # End of no-ccache check
+		fi # End of DISABLE_CCACHE_Q from nn.inc
 	fi
-# End of the GITMSG check
-fi
+fi # End of the GITMSG check
 
 }
 
 # Function: CONFIGURE_KODI
 function configure_kodi () {
-	
-	# Run function build_ccache
-	build_ccache
+
+	# We apply my hack for personalized info
+	if ! ${NOGIT_IS_SET}; then
+		patch_kodi
+	fi
+
+	if ${NOCCACHE_IS_SET} ; then
+		EXTRA_OPTIONS="-DENABLE_CCACHE:BOOL=OFF"
+	fi
+
+	# We use this function here to print a message that ccache was not found
+	ccache_not_found
+
+	# We try to find the Freetype2 include directory and add it to the configuration part
+	# The reason I've added this is because the build was failing for me
+	FIND_FREETYPE_INCLUDE=$( pkg-config --cflags --libs freetype2 | awk '{print $1}' | cut -dI -f2 )
 
 		if ${FRESH_INSTALL} ; then
-			MSG="${L_31} ${VKODI} ${L_37}"
-			echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			MSG="${L_31} ${VERSION} ${L_37}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			builtin cd ${KODI}
-			mkdir kodi-build > /dev/null 2>&1
-      builtin cd ${KODI}/kodi-build
-      cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
-			loggy "###########################################################"
+			check_kodibuild
+			builtin cd ${KODI}/build
+
+			export ${CMAKE_FLAGS}
+
+			# I experienced that the compilation failed due to an empty file with the json-rpc version
+			# and that's why I added this hack.
+			json_rpc_ver="9.1.0"
+
+			echo "cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DBUILD_TYPE=Release -DFFMPEG_PATH:BOOL="0" -DUSE_LTO:BOOL="1" -DENABLE_INTERNAL_FFMPEG:BOOL="1" -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE}.configure 2>&1
+			cmake .. \
+				${WITH_BUILD} \
+				-DJSONRPC_VERSION=\"${json_rpc_ver}\" \
+				-DCMAKE_INSTALL_PREFIX=${PREFIX} \
+				${EXTRA_OPTIONS} \
+				-DBUILD_TYPE=Release \
+				-DFFMPEG_PATH:BOOL="0" \
+				-DUSE_LTO:BOOL="1" \
+				-DENABLE_INTERNAL_FFMPEG:BOOL="1" \
+				-DENABLE_APP_AUTONAME=ON \
+				-DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} \
+				-DGIT_VERSION=\"${MY_GIT_VERSION}\" \
+				>> ${LOGGYLOGFILE}.configure 2>&1
+			separator_line
 		else
-			if ${CLEAN_IS_SET} ; then
-				MSG="${L_31} ${VKODI} ${L_38}"
-				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			check_kodibuild
+			if ${CLEAN_IS_SET} && ! ${DIRTY_IS_SET} ; then
+				MSG="${L_31} ${VERSION} ${L_38}"
+				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
-				builtin cd ${KODI}/kodi-build
-				cmake .. -DCMAKE_INSTALL_PREFIX=${PREFIX} >> ${LOGGYLOGFILE} 2>&1
-			elif ${DIRTY_IS_SET} ; then
-				MSG="${L_20} ${VKODI} ${L_39}"
-				echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+				builtin cd ${KODI}/build
+				export ${CMAKE_FLAGS}
+				echo "cmake .. ${WITH_BUILD} -DJSONRPC_VERSION=\"${json_rpc_ver}\" -DCMAKE_INSTALL_PREFIX=${PREFIX} ${EXTRA_OPTIONS} -DBUILD_TYPE=Release -DFFMPEG_PATH:BOOL="0" -DUSE_LTO:BOOL="1" -DENABLE_INTERNAL_FFMPEG:BOOL="1" -DENABLE_APP_AUTONAME=ON -DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} -DGIT_VERSION=\"${MY_GIT_VERSION}\"" >> ${LOGGYLOGFILE}.configure 2>&1
+				cmake .. \
+				${WITH_BUILD} \
+				-DJSONRPC_VERSION=\"${json_rpc_ver}\" \
+				-DCMAKE_INSTALL_PREFIX=${PREFIX} \
+				${EXTRA_OPTIONS} \
+				-DBUILD_TYPE=Release \
+				-DFFMPEG_PATH:BOOL="0" \
+				-DUSE_LTO:BOOL="1" \
+				-DENABLE_INTERNAL_FFMPEG:BOOL="1" \
+				-DENABLE_APP_AUTONAME=ON \
+				-DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} \
+				-DGIT_VERSION=\"${MY_GIT_VERSION}\" \
+				>> ${LOGGYLOGFILE}.configure 2>&1
+			elif ${DIRTY_IS_SET} && ! ${CLEAN_IS_SET} ; then
+				MSG="${L_30} ${VERSION} ${L_39}"
+				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 				loggy ${MSG}
-				builtin cd ${KODI}/kodi-build
 			fi
 		fi
+
+}
+
+# Function: CHECK_FOR_KODI_BIN
+function check_for_kodi_bin () {
+
+	KODI_BINARY=( kodi.bin kodi-x11 kodi-wayland kodi-gbm )
+
+	for binary in ${KODI_BINARY}
+	do
+		if [[ -a ${KODI}/build/${binary} ]]; then
+			found=${binary}
+			break
+		else
+			foundnothing=true
+		fi
+	done
+	
+	if ${foundnothing}; then
+		FAILED=false
+	else
+		FAILED=true
+		MSG="${L_32} ${found}"
+		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
+	fi
 
 }
 
@@ -393,22 +668,41 @@ function configure_kodi () {
 function build_kodi () {
 
 # We check if we have a message from git_pull. If not, we continue the build
-if [[ ! ${GITMSG} ]]; then
+if ( ! ${GITMSG} || ${FORCE_IS_SET} ) && ! ${ONLY_ADDONS} ; then
 
-    MSG="${L_30} ${VKODI}"
-    loggy ${MSG}
-		
-    MSG="${L_33} ${VKODI}. ${L_34}"
-    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-    loggy ${MSG}
-    cmake --build . -- VERBOSE=0 -s -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
+	MSG="${L_30} ${VERSION}"
+	loggy ${MSG}
 
-    if [[ ! -f ${KODI}/kodi-build/kodi.bin ]]; then
-        MSG="${L_35} ${VKODI} ${L_36}"
-        echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
-        loggy ${MSG}
-				FAILED="${L_110} ${VKODI} ${L_111}"
-    fi
+	MSG="${L_33} ${VERSION}. ${L_34}"
+	echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+	loggy ${MSG}
+	builtin cd ${KODI}/build
+	export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
+	export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -fstack-protector --param=ssp-buffer-size=4"
+	export CPPFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH} -D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4"
+
+	if [[ ${SHOW_CMD} == "ninja" ]]; then
+		${WITH_BUILD_CMD} >> ${LOGGYLOGFILE}.${SHOW_CMD} 2>&1 &
+		while pidof ${SHOW_CMD} > /dev/null 2>&1
+		do
+			NUMBERS=($( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | tail -1 | grep -v "\\%" | awk '{print $1}' | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' ))
+			if [[ ${#NUMBERS[2]} > 3 ]]; then
+				MSG=$(( ${NUMBERS[1]}*100/${NUMBERS[2]} ))
+				MSGa=$( echo ${MSG} | sed -e "s/\%//g" -e "s/\%\%//g" -e "s/\%0//g" )
+			fi
+			echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
+		done
+	else
+		${WITH_BUILD_CMD} --build . -- VERBOSE=0 -s >> ${LOGGYLOGFILE}.${SHOW_CMD} 2>&1 &
+		while pidof ${SHOW_CMD} > /dev/null 2>&1
+		do
+				MSG=$( grep "^\[" ${LOGGYLOGFILE}.${SHOW_CMD} | grep -vi Download | grep -vi Linking | grep CXX | grep -v crossguid | awk '{print $1$2}' | sed -e 's/Built//g' -e 's/Linking//g' -e 's/\[//g' | tail -1 | grep "\%" | sed -e "s/\[//g" -e "s/\]//g" -e 's/\//\ /g' -e "s/\%//g" )
+				MSGa=$( echo ${MSG} | sed -e "s/\%//g" -e "s/\%\%//g" -e "s/\%0//g" )
+				echo -ne "${TIME}[$(date +%T)]${END} ${Y}${L_99} ${MSGa}%${END}"\\r
+		done
+	fi
+
+	check_for_kodi_bin
 
 # End of the GITMSG check
 fi
@@ -418,64 +712,136 @@ fi
 # Function: INSTALL_KODI
 function install_kodi () {
 
-  if [[ ! ${FAILED} ]]; then
-        MSG="${L_90} ${PREFIX}"
-        echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-        loggy ${MSG}
-        builtin cd ${KODI}/kodi-build
-        sudo make -s install -j${NUMCPU} >> ${LOGGYLOGFILE} 2>&1
-	loggy "#########################################################"
-  fi
+  if ! ${FAILED} ; then
+		MSG="${L_90} ${PREFIX}"
+		echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+		loggy ${MSG}
+		builtin cd ${KODI}/build
+		if [[ ${SHOW_CMD} == "ninja" ]]; then
+			${SUDO} ${WITH_BUILD_CMD} install >> ${LOGGYLOGFILE}.${SHOW_CMD}.install 2>&1
+		else
+			${SUDO} make -s install -j${NUMCPU} >> ${LOGGYLOGFILE}.make.install 2>&1
+		fi
+		separator_line
+	elif ${FAILED} && ! ${ONLY_ADDONS} ; then
+		MSG="${L_35} ${VERSION} ${L_36}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
+		MSG="${L_110} ${VERSION} ${L_111} ${L_25}"
+		echo "${TIME}[$(date +%T)]${END} ${WARNING}${MSG}${END}"
+		loggy ${MSG}
+		if ${FAILED} ; then
+			clean_exit ${1}
+		fi
+	fi
 
 }
 
 # Function: INSTALL_ADDONS
 function install_addons () {
-	if ${ADDONS_IS_SET} ; then
-		if [[ ! ${FAILED} ]]; then
+
+# This is basically a hack to make addons install work during a fresh install
+# without changing too much of the code.
+if ( ${FRESH_ADDON_IS_SET} && ${FRESH_INSTALL} ) ; then
+	FRESH_INSTALL=false
+fi
+
+if ! ${FRESH_INSTALL} ; then
+
+	if ${ADDON_IS_SET} && ${DIRTY_IS_SET} ; then
+		CLEAN_IS_SET=true
+		ADDONS=" (${L_38:u})"
+	fi
+
+	if ${ONLY_ADDONS} ; then
+		ADDON_IS_SET=true
+		if [[ -f ${PREFIX}/bin/kodi ]]; then
+			FAILED=false
+		else
+			FAILED=true
+		fi
+		CLEAN_IS_SET=true
+		ADDONS=" ${L_95}"
+	fi
+
+	if ${ADDON_IS_SET} ; then
+		if ! ${FAILED} ; then
 			if ${CLEAN_IS_SET} ; then
-		    MSG="${L_91}"
-		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		    loggy ${MSG}
+				MSG="${L_91}${ADDONS}"
+				echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+				loggy ${MSG}
 				builtin cd ${KODI}
-		    sudo make -s -C \
+				${SUDO} make -s -C \
 				tools/depends/target/binary-addons \
 				distclean \
 				> /dev/null 2>&1
 			fi
 
-		    MSG="${L_92}"
-		    echo "${WHITE}[$(date +%T)]${END} ${INFO}${MSG}${END}"
-		    loggy ${MSG}
-		    sudo make -s -j${NUMCPU} -C \
-		    tools/depends/target/binary-addons \
-		    PREFIX=${PREFIX} \
-		    >> ${LOGGYLOGFILE} 2>&1
-				NOTBUILT=$( grep "Following Addons failed to build" ${LOGGYLOGFILE} | cut -d: -f2 )
-				if [[ ! ${NOTBUILT} == "" ]]; then
-					MSG="${L_94}:${NOTBUILT}"
-					echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${RED}${MSG}${END}"
-				fi
+			MSG="${L_92}${ADDONS}"
+			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
+			loggy ${MSG}
+
+			# This is a test to see if it is possible to speed up the compilation of
+			# the binary addons. Looks like some of them are using all of the availble
+			# CPUS/threads, while others don't.
+			# Don't think I'll be able to do anything about it.
+			export MAKEFLAGS="-s -j${NUMCPU}"
+			export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}"
+			export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}"
+			export CPPFLAGS="-D_FORTIFY_SOURCE=2"
+			${SUDO} export MAKEFLAGS="-s -j${NUMCPU}" > /dev/null 2>&1
+			${SUDO} export CFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}" > /dev/null 2>&1
+			${SUDO} export CXXFLAGS="-O3 -ffast-math -march=${MY_CPU_ARCH} -mtune=${MY_CPU_ARCH}" > /dev/null 2>&1
+			${SUDO} export CPPFLAGS="-D_FORTIFY_SOURCE=2" > /dev/null 2>&1
+			${SUDO} make -j${NUMCPU} -C \
+			tools/depends/target/binary-addons \
+			PREFIX=${PREFIX} \
+			>> ${LOGGYLOGFILE}.addons 2>&1
+			NOTBUILT=( $( grep "Following Addons failed to build: " ${LOGGYLOGFILE}.addons | tail -1 | cut -d: -f2 ) )
+			if [[ ! ${NOTBUILT} == "" ]]; then
+				MSG="${L_94}"
+				echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+				for i in ${NOTBUILT}
+				do
+					echo "${TIME}[$(date +%T)]${END} ${W}**${END} ${WARNING}${i}${END}"
+				done
+			fi
+		else
+			MSG="${L_96} ${L_102} \"build.leia --help\" ${L_103}"
+			echo "${TIME}[$(date +%T)]${END} ${ARROW} ${WARNING}${MSG}${END}"
+			loggy ${MSG}
+			clean_exit ${1}
 		fi
-	else
+	elif ! ${ADDON_IS_SET} && ${FRESH_INSTALL} ; then
 		MSG="${L_93}"
-		echo "${WHITE}[$(date +%T)]${END} ${ARROW} ${PURPLE}${MSG}${END}"
+		echo "${TIME}[$(date +%T)]${END} ${ARROW} ${OTHER}${MSG}${END}"
 		loggy ${MSG}
 	fi
+
+fi
+
 }
 
 # Here we run all of our functions in turn
-detect_linux_dist
-fetch_kodi
-git_pull
-clean_kodi
-configure_kodi
-build_kodi
-install_kodi
-install_addons
+fetch_kodi ${0:t}
+git_pull ${0:t}
+precheck_for_kodi ${0:t}
+clean_kodi ${0:t}
+remove_kodi ${0:t}
+configure_kodi ${0:t}
+build_kodi ${0:t}
+install_kodi ${0:t}
+install_addons ${0:t}
 
-echo "###################################################################" >> ${LOGGYLOGFILE}
-echo "#             End of compilation for ${VKODI}                         #" >> ${LOGGYLOGFILE}
-echo "###################################################################" >> ${LOGGYLOGFILE}
-echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_120}: ${PREFIX}/bin/kodi${END}"
-echo "${WHITE}[$(date +%T)]${END} ${YELLOW}${L_121}: ${LOGGYLOGFILE}${END}"
+separator_line
+echo "#             End of compilation for ${VERSION}                         #" >> ${LOGGYLOGFILE}
+separator_line
+echo "${TIME}[$(date +%T)]${END} ${Y}${L_120}:${END}"
+echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${PREFIX}/bin/kodi${END}"
+echo "${TIME}[$(date +%T)]${END} ${Y}${L_121}:${END}"
+echo "${TIME}[$(date +%T)]${END} ${ARROW} ${Y}${LOGGYLOGFILE}${END}"
+echo "${TIME}[$(date +%T)]${END} ${W}${L_190} ${0:t} v${SCRIPT_VERSION} ${L_191}${END}"
+echo "${TIME}[$(date +%T)]${END} ${W}${L_192}${END}"
+echo "${TIME}[$(date +%T)]${END} ${W}${L_193}${END}"
+
+clean_exit ${0:t}
