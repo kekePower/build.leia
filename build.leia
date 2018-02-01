@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.9-pre3"
+SCRIPT_VERSION="1.6.9-pre4"
 
 trap "interrupted ${0:t}" INT
 
@@ -182,6 +182,15 @@ if [[ ! -a /usr/local/bin/JsonSchemaBuilder ]]; then
 	not_found+=( JsonSchemaBuilder )
 fi
 
+# Looking if ninja selected and is installed
+if ${USE_NINJA}; then
+	if [[ ! -a $( which ninja ) ]]; then
+		not_found+=( ninja )
+		ninja_url="Please install ninja"
+	fi
+fi
+
+
 for nf in ${not_found}
 do
 	if [[ ${nf} == "git" ]]; then
@@ -200,11 +209,9 @@ do
 	if [[ ${url} ]]; then
 		echo "${TIME}[$(date +%T)]${END} ${W}${ARROW} ${url}${END}"
 		loggy ${url}
+		clean_exit ${0:t}
 	fi
 done
-#if [[ ${not_found[-1]} ]]; then
-#	clean_exit ${0:t}
-#fi
 
 }
 
@@ -540,6 +547,17 @@ fi # End of the GITMSG check
 
 }
 
+# Function: CHECK_CONFIGURE_ERRORS
+function check_configure_errors () {
+
+	if [[ $( grep "Could NOT find" ${LOGGYLOGFILE}.configure ) ]]; then
+		MSG=$( grep "Could NOT find" ${LOGGYLOGFILE}.configure )
+		echo "${TIME}[$(date +%T)]${END} ${ARROW}${WARNING}${MSG}${END}"
+		clean_exit ${1}
+	fi
+
+}
+
 # Function: CONFIGURE_KODI
 function configure_kodi () {
 
@@ -810,6 +828,7 @@ precheck_for_kodi ${0:t}
 clean_kodi ${0:t}
 remove_kodi ${0:t}
 configure_kodi ${0:t}
+check_configure_errors ${0:t}
 build_kodi ${0:t}
 install_kodi ${0:t}
 install_addons ${0:t}
