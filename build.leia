@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.9-pre4"
+SCRIPT_VERSION="1.6.9-pre6"
 
 trap "interrupted ${0:t}" INT
 
@@ -550,8 +550,8 @@ fi # End of the GITMSG check
 # Function: CHECK_CONFIGURE_ERRORS
 function check_configure_errors () {
 
-	if [[ $( grep "Could NOT find" ${LOGGYLOGFILE}.configure ) ]]; then
-		MSG=$( grep "Could NOT find" ${LOGGYLOGFILE}.configure )
+	if [[ $( tail -20 ${LOGGYLOGFILE}.configure | grep "Could NOT find" | grep -v MDNS ) ]]; then
+		MSG=$( tail -20 ${LOGGYLOGFILE}.configure | grep "Could NOT find" | grep -v MDNS )
 		echo "${TIME}[$(date +%T)]${END} ${ARROW}${WARNING}${MSG}${END}"
 		clean_exit ${1}
 	fi
