@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.9"
+SCRIPT_VERSION="1.6.10"
 
 trap "interrupted ${0:t}" INT
 
@@ -220,7 +220,7 @@ function get_git_rev() {
 
 	REV=$( git rev-parse HEAD )
 	if [[ ${1} == "short" ]]; then
-		echo ${REV[7]}
+		echo ${REV:0:7}
 	elif [[ ${1} == "long" ]]; then
 		echo ${REV}
 	else
