@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.9-pre8"
+SCRIPT_VERSION="1.6.9"
 
 trap "interrupted ${0:t}" INT
 
