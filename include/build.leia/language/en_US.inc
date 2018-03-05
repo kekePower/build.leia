@@ -30,6 +30,7 @@ L_22="from git"
 L_23="is already up to date."
 L_24="Forced option is set."
 L_25="Aborting!"
+L_26="Revision"
 
 L_30="Starting build process"
 L_31="Configuring"
