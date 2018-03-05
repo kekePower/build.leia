@@ -30,6 +30,7 @@ L_22="fra git"
 L_23="er allerede oppdatert."
 L_24="Tvunget fortsettelse."
 L_25="Avbryter!"
+L_26="Revisjon"
 
 L_30="Starter byggeprosess for"
 L_31="Konfigurerer"

@@ -30,6 +30,7 @@ L_22="de la git"
 L_23="este deja actualizat."
 L_24="Opțiunea forțată este setată."
 L_25="Abandonarea!"
+L_26="Revizuire"
 
 L_30="Pornirea procesului de construire"
 L_31="Configurare"

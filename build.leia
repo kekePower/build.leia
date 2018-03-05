@@ -1,6 +1,6 @@
 #!/bin/env zsh
 
-SCRIPT_VERSION="1.6.9-pre7"
+SCRIPT_VERSION="1.6.9-pre8"
 
 trap "interrupted ${0:t}" INT
 
@@ -212,6 +212,20 @@ do
 		clean_exit ${0:t}
 	fi
 done
+
+}
+
+#FUNCTION: get_git_rev
+function get_git_rev() {
+
+	REV=$( git rev-parse HEAD )
+	if [[ ${1} == "short" ]]; then
+		echo ${REV[7]}
+	elif [[ ${1} == "long" ]]; then
+		echo ${REV}
+	else
+		echo "UNKNOWN"
+	fi
 
 }
 
@@ -444,7 +458,7 @@ function git_pull () {
 
 		else
 
-			MSG="${L_21} ${VERSION} ${L_22}"
+			MSG="${L_21} ${VERSION} ${L_22} (${L_26}: $(get_git_rev short))"
 			echo "${TIME}[$(date +%T)]${END} ${INFO}${MSG}${END}"
 			loggy ${MSG}
 			# We have to run the prepare_hack function now, before we git pull
@@ -600,7 +614,7 @@ function configure_kodi () {
 				-DBUILD_TYPE=Release \
 				-DFFMPEG_PATH:BOOL="0" \
 				-DUSE_LTO:BOOL="${USELTO}" \
-				-DENABLE_INTERNAL_FFMPEG:BOOL="1" \
+				-DENABLE_INTERNAL_FFMPEG:BOOL="0" \
 				-DENABLE_APP_AUTONAME=ON \
 				-DFREETYPE_INCLUDE_DIR=${FIND_FREETYPE_INCLUDE} \
 				-DGIT_VERSION=\"${MY_GIT_VERSION}\" \

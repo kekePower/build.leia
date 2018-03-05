@@ -30,6 +30,7 @@ L_22="de git"
 L_23="ya está actualizado."
 L_24="La opción forzada está configurada."
 L_25="Abortando!"
+L_26="Revisión"
 
 L_30="Iniciando el proceso de compilación"
 L_31="Configurando"
